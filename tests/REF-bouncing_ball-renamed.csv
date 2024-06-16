@@ -1,0 +1,6 @@
+name;newName;valueReference;causality;variability
+parameter.h;parameter.h;0;local;continuous
+out.der(h);out.der(h);1;local;continuous
+out.v;out.v;2;local;continuous
+out.der(v);out.der(v);3;local;continuous
+e;e;5;parameter;tunable
