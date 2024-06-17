@@ -40,8 +40,8 @@ jobs:
         with:
           name: binaries
           path: |
-            ${{ github.workspace }}/remoting/win32/client_sm.dll
-            ${{ github.workspace }}/remoting/win32/server_sm.exe
+            ${{ github.workspace }}/fmutool/remoting/win32/client_sm.dll
+            ${{ github.workspace }}/fmutool/remoting/win32/server_sm.exe
   compile-windows64:
     runs-on: windows-latest
     steps:
@@ -73,8 +73,8 @@ jobs:
         with:
           name: binaries
           path: |
-            ${{ github.workspace }}/remoting/win64/client_sm.dll
-            ${{ github.workspace }}/remoting/win64/server_sm.exe
+            ${{ github.workspace }}/fmutool/remoting/win64/client_sm.dll
+            ${{ github.workspace }}/fmutool/remoting/win64/server_sm.exe
   compile-linux32:
     runs-on: ubuntu-latest
     steps:
@@ -106,8 +106,8 @@ jobs:
         with:
           name: binaries
           path: |
-            ${{ github.workspace }}/remoting/linux32/client_sm.so
-            ${{ github.workspace }}/remoting/linux32/server_sm
+            ${{ github.workspace }}/fmutool/remoting/linux32/client_sm.so
+            ${{ github.workspace }}/fmutool/remoting/linux32/server_sm
   compile-linux64:
     runs-on: ubuntu-latest
     steps:
@@ -138,8 +138,8 @@ jobs:
         with:
           name: binaries
           path: |
-            ${{ github.workspace }}/remoting/linux64/client_sm.so
-            ${{ github.workspace }}/remoting/linux64/server_sm
+            ${{ github.workspace }}/fmutool/remoting/linux64/client_sm.so
+            ${{ github.workspace }}/fmutool/remoting/linux64/server_sm
 
   package:
     needs: [compile-windows32, compile-windows64, compile-linux32, compile-linux64]
