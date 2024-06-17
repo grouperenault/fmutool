@@ -92,8 +92,8 @@ jobs:
         # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
         run: >
           cmake -B ${{ steps.strings.outputs.build-output-dir }}
-          -DCMAKE_CXX_COMPILER=cl
-          -DCMAKE_C_COMPILER=cl
+          -DCMAKE_CXX_COMPILER=g++
+          -DCMAKE_C_COMPILER=gcc
           -DCMAKE_BUILD_TYPE=Release
           -DBUILD_32=ON
           -S ${{ github.workspace }}/remoting
@@ -125,8 +125,8 @@ jobs:
         # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
         run: >
           cmake -B ${{ steps.strings.outputs.build-output-dir }}
-          -DCMAKE_CXX_COMPILER=cl
-          -DCMAKE_C_COMPILER=cl
+          -DCMAKE_CXX_COMPILER=g++
+          -DCMAKE_C_COMPILER=gcc
           -DCMAKE_BUILD_TYPE=Release
           -S ${{ github.workspace }}/remoting
 
