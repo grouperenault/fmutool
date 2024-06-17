@@ -136,12 +136,9 @@ jobs:
           name: binaries-linux64
           path: ${{ github.workspace }}/fmutool/remoting/linux64
           retention-days: 1
-
   package:
     needs: [compile-windows32, compile-windows64, compile-linux64]
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v4
     - uses: actions/download-artifact@master
@@ -171,3 +168,9 @@ jobs:
       run: |
         cd tests
         python -munittest -v test_suite.py
+    - name: Archive Artifacts
+      uses: actions/upload-artifact@master
+      with:
+        name: package
+        path: ${{ github.workspace }}/build
+        retention-days: 1
