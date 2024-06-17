@@ -36,12 +36,11 @@ jobs:
         # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
         run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config Release
       - name: Archive Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@master
         with:
           name: binaries
-          path: |
-            ${{ github.workspace }}/fmutool/remoting/win32/client_sm.dll
-            ${{ github.workspace }}/fmutool/remoting/win32/server_sm.exe
+          path: ${{ github.workspace }}/fmutool/remoting/win32/
+            #${{ github.workspace }}/fmutool/remoting/win32/server_sm.exe
   compile-windows64:
     runs-on: windows-latest
     steps:
@@ -69,12 +68,11 @@ jobs:
         # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
         run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config Release
       - name: Archive Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@master
         with:
           name: binaries
-          path: |
-            ${{ github.workspace }}/fmutool/remoting/win64/client_sm.dll
-            ${{ github.workspace }}/fmutool/remoting/win64/server_sm.exe
+          path: ${{ github.workspace }}/fmutool/remoting/win64
+            #${{ github.workspace }}/fmutool/remoting/win64/server_sm.exe
   compile-linux32:
     runs-on: ubuntu-latest
     steps:
@@ -102,12 +100,11 @@ jobs:
         # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
         run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config Release
       - name: Archive Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@master
         with:
           name: binaries
-          path: |
-            ${{ github.workspace }}/fmutool/remoting/linux32/client_sm.so
-            ${{ github.workspace }}/fmutool/remoting/linux32/server_sm
+          path: ${{ github.workspace }}/fmutool/remoting/linux32/client_sm.so
+            #${{ github.workspace }}/fmutool/remoting/linux32/server_sm
   compile-linux64:
     runs-on: ubuntu-latest
     steps:
@@ -134,20 +131,23 @@ jobs:
         # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
         run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config Release
       - name: Archive Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@master
         with:
           name: binaries
-          path: |
-            ${{ github.workspace }}/fmutool/remoting/linux64/client_sm.so
-            ${{ github.workspace }}/fmutool/remoting/linux64/server_sm
+          path: ${{ github.workspace }}/fmutool/remoting/linux64
+            #${{ github.workspace }}/fmutool/remoting/linux64/server_sm
 
   package:
-    needs: [compile-windows32, compile-windows64, compile-linux32, compile-linux64]
+    needs: [compile-windows32, compile-windows64, compile-linux64]
 
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
+    - uses: actions/download-artifact@master
+      with:
+        name: binaries
+        path: ${{ github.workspace }}/fmutool/remoting/
     - name: Set up Python 3.10
       uses: actions/setup-python@v3
       with:
