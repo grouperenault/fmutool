@@ -38,9 +38,9 @@ jobs:
       - name: Archive Artifacts
         uses: actions/upload-artifact@master
         with:
-          name: binaries
+          name: binaries-win32
           path: ${{ github.workspace }}/fmutool/remoting/win32/
-            #${{ github.workspace }}/fmutool/remoting/win32/server_sm.exe
+          retention-days: 1
   compile-windows64:
     runs-on: windows-latest
     steps:
@@ -70,9 +70,9 @@ jobs:
       - name: Archive Artifacts
         uses: actions/upload-artifact@master
         with:
-          name: binaries
+          name: binaries-win64
           path: ${{ github.workspace }}/fmutool/remoting/win64
-            #${{ github.workspace }}/fmutool/remoting/win64/server_sm.exe
+          retention-days: 1
   compile-linux32:
     runs-on: ubuntu-latest
     steps:
@@ -102,9 +102,9 @@ jobs:
       - name: Archive Artifacts
         uses: actions/upload-artifact@master
         with:
-          name: binaries
+          name: binaries-linux32
           path: ${{ github.workspace }}/fmutool/remoting/linux32/client_sm.so
-            #${{ github.workspace }}/fmutool/remoting/linux32/server_sm
+          retention-days: 1
   compile-linux64:
     runs-on: ubuntu-latest
     steps:
@@ -133,9 +133,9 @@ jobs:
       - name: Archive Artifacts
         uses: actions/upload-artifact@master
         with:
-          name: binaries
+          name: binaries-linux64
           path: ${{ github.workspace }}/fmutool/remoting/linux64
-            #${{ github.workspace }}/fmutool/remoting/linux64/server_sm
+          retention-days: 1
 
   package:
     needs: [compile-windows32, compile-windows64, compile-linux64]
@@ -146,8 +146,16 @@ jobs:
     - uses: actions/checkout@v4
     - uses: actions/download-artifact@master
       with:
-        name: binaries
-        path: ${{ github.workspace }}/fmutool/remoting/
+        name: binaries-win64
+        path: ${{ github.workspace }}/fmutool/remoting/win64/
+    - uses: actions/download-artifact@master
+      with:
+        name: binaries-win32
+        path: ${{ github.workspace }}/fmutool/remoting/win32/
+    - uses: actions/download-artifact@master
+      with:
+        name: binaries-linux64
+        path: ${{ github.workspace }}/fmutool/remoting/linux64/
     - name: Set up Python 3.10
       uses: actions/setup-python@v3
       with:
