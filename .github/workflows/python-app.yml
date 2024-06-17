@@ -32,4 +32,5 @@ jobs:
         python setup.py build --build-lib=build
     - name: Test with pytest
       run: |
+        cd tests
         python -munittest -v test_suite.py
