@@ -141,7 +141,7 @@ jobs:
           path: ${{ github.workspace }}/fmutool/remoting/linux64
           retention-days: 1
   package:
-    needs: [compile-windows32, compile-windows64, compile-linux64]
+    needs: [compile-windows32, compile-windows64, compile-linux32, compile-linux64]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -153,6 +153,10 @@ jobs:
       with:
         name: binaries-win32
         path: ${{ github.workspace }}/fmutool/remoting/win32/
+    - uses: actions/download-artifact@master
+      with:
+        name: binaries-linux32
+        path: ${{ github.workspace }}/fmutool/remoting/linux32/
     - uses: actions/download-artifact@master
       with:
         name: binaries-linux64
