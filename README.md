@@ -7,7 +7,7 @@ It is highly customizable.
 ## Graphical User Interface
 
 FMUTool is released with a GUI. You can launch it with the following command `python -mfmutool` (without any option)
-See `requirements.txt' to install required python packages.
+See `requirements.txt` to install required python packages.
 
 ## Command Line Interface
 
