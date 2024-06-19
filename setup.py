@@ -1,11 +1,16 @@
 from setuptools import setup
 import os
+import re
 from fmutool.version import __author__ as author, __version__ as default_version
 
 try:
     version = os.environ["GITHUB_REF_NAME"]
 except Exception as e:
     print(f"Cannot get repository status: {e}. Defaulting to {default_version}")
+    version = default_version
+
+if not re.match(r"[A-Za-z]?\d+\.\d+", version):
+    print(f"Version {version} does not match standard. Defaulting to {default_version}")
     version = default_version
 
 # Create __version__.py
