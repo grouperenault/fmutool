@@ -170,10 +170,11 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
+        pip install build
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Package
       run: |
-        python setup.py build --build-lib=build
+        python -m build
     - name: Test with pytest
       run: |
         cd tests

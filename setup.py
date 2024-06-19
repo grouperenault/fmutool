@@ -5,8 +5,15 @@ from fmutool.version import __author__ as author, __version__ as default_version
 try:
     version = os.environ["GITHUB_REF_NAME"]
 except Exception as e:
-    print(f"Cannot get repository status: {e}")
+    print(f"Cannot get repository status: {e}. Defaulting to {default_version}")
     version = default_version
+
+# Create __version__.py
+try:
+    with open("fmutool/__version__.py", "wt") as file:
+        print(f"'{version}'", file=file)
+except Exception as e:
+    print(f"Cannot create __version__.py: {e}")
 
 setup(
     name="fmutool",
@@ -29,9 +36,4 @@ setup(
     url="https://github.com/grouperenault/fmutool/",
 )
 
-# Create __version__.py
-try:
-    with open("build/fmutool/__version__.py", "wt") as file:
-        print(f"'{version}'", file=file)
-except Exception as e:
-    print(f"Cannot create __version__.py: {e}")
+os.remove("fmutool/__version__.py")
