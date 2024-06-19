@@ -3,7 +3,7 @@ import sys
 import os
 
 sys.path.insert(0, os.path.relpath(os.path.join(os.path.dirname(__file__), "..")))
-from fmutool.fmu import *
+from fmutool.fmu_operations import *
 
 
 class FMUToolTestSuite(unittest.TestCase):

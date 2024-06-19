@@ -1,6 +1,6 @@
 import argparse
 import sys
-from .fmu import *
+from .fmu_operations import *
 from .checker import OperationCheck
 from .version import __version__ as version
 from .help import Help

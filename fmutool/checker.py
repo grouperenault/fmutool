@@ -1,6 +1,6 @@
 from fmutool.version import __author__ as author
 
-from .fmu import OperationAbstract, OperationException
+from .fmu_operations import OperationAbstract, OperationException
 
 
 class OperationCheck(OperationAbstract):

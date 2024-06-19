@@ -1,7 +1,10 @@
 # FMUTool
 
-FMUTool is a swiss knife to modify a FMU without recompilation. It mainly modify the `modelDescription.xml` file.
-It is highly customizable. 
+FMUTool is a python application which help to modify a FMU without recompilation.
+It mainly modifies the `modelDescription.xml` file. It is highly customizable.
+
+Manipulating the `modelDescription.xml` can be a dangerous thing! Communicating with the FMU-developer and adapting
+the way the FMU is generated, is the preferable when possible.
 
 
 ## Graphical User Interface
@@ -99,7 +102,7 @@ You can write your own FMU Manipulation scripts. Once you downloaded fmutool mod
 adding the `import` statement lets you access the API :
 
 ```python
-from fmu import FMU, OperationExtractNames, OperationStripTopLevel, OperationRenameFromCSV
+from fmutool.fmu_operations import FMU, OperationExtractNames, OperationStripTopLevel, OperationRenameFromCSV
 ```
 
 ### remove toplevel bus (if any)

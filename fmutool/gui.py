@@ -9,7 +9,7 @@ import textwrap
 from functools import partial
 from typing import Optional
 
-from .fmu import *
+from .fmu_operations import *
 from .checker import OperationCheck
 from .help import Help
 
