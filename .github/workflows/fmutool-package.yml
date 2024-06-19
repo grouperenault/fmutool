@@ -9,7 +9,8 @@ on:
       - '*'
   pull_request:
     branches: [ "main" ]
-
+permissions:
+  id-token: write
 jobs:
   compile-windows32:
     runs-on: windows-latest
