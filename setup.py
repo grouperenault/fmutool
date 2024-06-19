@@ -44,7 +44,7 @@ It mainly modifies the `modelDescription.xml` file. It is highly customizable.
 
 Manipulating the `modelDescription.xml` can be a dangerous thing! Communicating with the FMU-developer and adapting
 the way the FMU is generated, is the preferable when possible.
-    """
+    """,
 )
 
 os.remove("fmutool/__version__.py")

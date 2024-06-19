@@ -9,8 +9,10 @@ the way the FMU is generated, is the preferable when possible.
 
 ## Graphical User Interface
 
-FMUTool is released with a GUI. You can launch it with the following command `python -mfmutool` (without any option)
+FMUTool is released with a GUI. You can launch it with the following command `python -m fmutool` (without any option)
 See `requirements.txt` to install required python packages.
+
+![GUI](doc/fmutool.png "GUI")
 
 ## Command Line Interface
 
@@ -22,7 +24,7 @@ usage: fmutool [-h] -input path/to/module.fmu [-output path/to/module-modified.f
                [-extract-descriptor path/to/saved-modelDescriptor.xml] [-remove-sources] [-only-parameters]
                [-only-inputs] [-only-outputs] [-summary] [-check]
 
-fmutool is a swiss knife to manipulate FMU.
+fmutool is program to manipulate FMU.
 
 optional arguments:
   -h, -help                         display help.

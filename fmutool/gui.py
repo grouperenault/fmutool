@@ -202,7 +202,7 @@ class FmutoolMainWindow(QWidget):
     def __init__(self, app, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.setWindowTitle('FMUTool - a swiss knife to manipulate FMU')
+        self.setWindowTitle('FMUTool - manipulate your FMU''s')
         self.setWindowIcon(QIcon(os.path.join(os.path.dirname(__file__), 'resources', 'fmutool.png')))
 
         # set the grid layout
