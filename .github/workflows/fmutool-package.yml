@@ -4,11 +4,11 @@ name: Release FMUTOOL
 
 on:
   push:
-    branches: [master]
+    branches: [main]
 
 permissions:
   id-token: write
-  
+
 jobs:
   compile-windows32:
     runs-on: windows-latest
