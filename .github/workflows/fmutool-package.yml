@@ -5,8 +5,8 @@ name: Release FMUTOOL
 on:
   push:
     branches: [main]
-  tags:
-    - '*'
+    tags:
+      - '*'
 
 permissions:
   id-token: write
