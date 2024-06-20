@@ -1,5 +1,6 @@
 from setuptools import setup
 import os
+import sys
 import re
 from fmutool.version import __author__ as author, __version__ as default_version
 
@@ -9,9 +10,9 @@ except Exception as e:
     print(f"Cannot get repository status: {e}. Defaulting to {default_version}")
     version = default_version
 
-if not re.match(r"[A-Za-z]?\d+\.\d+", version):
-    print(f"Version {version} does not match standard. Defaulting to {default_version}")
-    version = default_version
+if not re.match(r"[A-Za-z]?\d+(\.\d)+", version):
+    print(f"Version {version} does not match standard. ABORT.")
+    sys.exit(-1)
 
 # Create __version__.py
 try:
