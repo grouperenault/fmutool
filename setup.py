@@ -11,6 +11,7 @@ except Exception as e:
 
 if not re.match(r"[A-Za-z]?\d+(\.\d)+", version):
     print(f"WARNING: Version {version} does not match standard. The publication will fail !")
+    version = default_version
 
 # Create __version__.py
 try:

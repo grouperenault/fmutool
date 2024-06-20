@@ -1,7 +1,7 @@
 try:
     from fmutool.__version__ import __doc__ as __version__
 except ModuleNotFoundError:
-    __version__ = "DEVEL"
+    __version__ = "0.0-dev"
 
 __author__ = "Nicolas.LAURENT@Renault.com"
 __copyright__ = "Copyright 2023-2024, Renault SAS"
