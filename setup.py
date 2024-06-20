@@ -39,8 +39,10 @@ setup(
     entry_points={"console_scripts": ["fmutool = fmutool.__main__:main"]},
     author=author,
     url="https://github.com/grouperenault/fmutool/",
-    long_description="""FMUTool is a python application which help to modify a FMU without recompilation.
-It mainly modifies the `modelDescription.xml` file. It is highly customizable.
+    description="FMUTool is a python application which help to modify a Functional Mock-up Units (FMUs) "
+                "without recompilation",
+    long_description="""FMUTool is a python application which help to modify a Functional Mock-up Units (FMUs) 
+without recompilation. It mainly modifies the `modelDescription.xml` file. It is highly customizable.
 
 Manipulating the `modelDescription.xml` can be a dangerous thing! Communicating with the FMU-developer and adapting
 the way the FMU is generated, is the preferable when possible.
