@@ -122,8 +122,12 @@ def cli():
         print(f"INFO    Modified FMU is not saved. If necessary use '-output' option.")
 
 
-if __name__ == '__main__':
+def main():
     if len(sys.argv) == 1:
         gui()
     else:
         cli()
+
+
+if __name__ == '__main__':
+    main()
