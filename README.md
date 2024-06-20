@@ -1,10 +1,10 @@
 # FMUTool
 
-FMUTool is a python application which help to modify a FMU without recompilation.
-It mainly modifies the `modelDescription.xml` file. It is highly customizable.
+FMUTool is a python application which help to modify a [Functional Mock-up Units (FMUs)](http://fmi-standard.org/)
+without recompilation. It mainly modifies the `modelDescription.xml` file. It is highly customizable.
 
 Manipulating the `modelDescription.xml` can be a dangerous thing! Communicating with the FMU-developer and adapting
-the way the FMU is generated, is the preferable when possible.
+the way the FMU is generated, is preferable when possible.
 
 
 ## Graphical User Interface
