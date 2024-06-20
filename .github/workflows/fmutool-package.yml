@@ -170,19 +170,29 @@ jobs:
         python -m pip install --upgrade pip
         pip install build
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: Package
-      run: |
-        python -m build
     - name: Test with pytest
       run: |
         cd tests
         python -munittest -v test_suite.py
+    - name: Package
+      run: |
+        python -m build
     - name: Archive Artifacts
       uses: actions/upload-artifact@master
       with:
         name: package
-        path: ${{ github.workspace }}/build
+        path: ${{ github.workspace }}/dist
         retention-days: 1
+  publish:
+    if: startsWith(github.ref, 'refs/tags/V')
+    needs: [package]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/download-artifact@master
+      with:
+        name: package
+        path: ${{ github.workspace }}/dist
     - name: Publish package
       uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
       with:
