@@ -7,14 +7,26 @@ Manipulating the `modelDescription.xml` can be a dangerous thing! Communicating 
 the way the FMU is generated, is preferable when possible.
 
 
+## Installation
+
+Two options available to install FMUTool:
+
+- (Easiest option) Install with from PyPI: `python -m pip install fmutool`
+- Compile and install from [github repository](https://github.com/grouperenault/fmutool). You will need 
+  - Python required packages. See `requirements.txt`.
+  - C compiler
+
+    
 ## Graphical User Interface
 
-FMUTool is released with a GUI. You can launch it with the following command `python -m fmutool` (without any option)
-See `requirements.txt` to install required python packages.
+FMUTool is released with a GUI. You can launch it with the following command `fmutool` (without any option)
 
 ![GUI](doc/fmutool.png "GUI")
 
+
 ## Command Line Interface
+
+You can use `fmutool -help` to get usage:
 
 ```
 usage: fmutool [-h] -input path/to/module.fmu [-output path/to/module-modified.fmu] [-remove-toplevel] [-merge-toplevel]
@@ -97,6 +109,7 @@ optional arguments:
   -check                            performs some check of FMU and display Errors or Warnings. This is useful to avoid
                                     later issues when using the FMU. (default: None)
 ```
+
 
 ## API
 

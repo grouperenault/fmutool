@@ -5,6 +5,7 @@ from .checker import OperationCheck
 from .version import __version__ as version
 from .help import Help
 
+
 def gui():
     try:
         from .gui import main
@@ -27,7 +28,7 @@ def cli():
         except TypeError:
             return formatter
 
-    help = Help()
+    help_message = Help()
 
     parser = argparse.ArgumentParser(prog='fmutool', description='%(prog)s is a swiss knife to manipulate FMU.',
                                      formatter_class=make_wide(argparse.ArgumentDefaultsHelpFormatter),
@@ -35,7 +36,7 @@ def cli():
                                      epilog="see: https://github.com/grouperenault/fmutool/blob/main/README.md")
 
     def add_option(option, *args, **kwargs):
-        parser.add_argument(option, *args, help=help.usage(option), **kwargs)
+        parser.add_argument(option, *args, help=help_message.usage(option), **kwargs)
 
     add_option('-h', '-help', action="help")
 
@@ -67,9 +68,9 @@ def cli():
 
     # Extraction / Removal
     add_option('-extract-descriptor', action='store', dest='extract_description',
-                        metavar='path/to/saved-modelDescriptor.xml')
+               metavar='path/to/saved-modelDescriptor.xml')
     add_option('-remove-sources', action='append_const', dest='operations_list',
-                        const=OperationRemoveSources())
+               const=OperationRemoveSources())
     # Filter
     add_option('-only-parameters', action='append_const', dest='apply_on', const='parameter')
     add_option('-only-inputs', action='append_const', dest='apply_on', const='input')
@@ -78,43 +79,43 @@ def cli():
     add_option('-summary', action='append_const', dest='operations_list', const=OperationSummary())
     add_option('-check', action="append_const", dest='operations_list', const=OperationCheck())
 
-    args = parser.parse_args()
+    cli_options = parser.parse_args()
     # handle the "no operation" use case
-    if not args.operations_list:
-        args.operations_list = []
+    if not cli_options.operations_list:
+        cli_options.operations_list = []
 
-    if args.fmu_input == args.fmu_output:
+    if cli_options.fmu_input == cli_options.fmu_output:
         print(f"FATAL ERROR: '-input' and '-output' should point to different files.")
         sys.exit(-3)
 
-    print(f"READING Input='{args.fmu_input}'")
+    print(f"READING Input='{cli_options.fmu_input}'")
     try:
-        fmu = FMU(args.fmu_input)
+        fmu = FMU(cli_options.fmu_input)
     except FMUException as reason:
         print(f"FATAL ERROR: {reason}")
         sys.exit(-4)
 
-    if args.apply_on:
+    if cli_options.apply_on:
         print("Applying operation for :")
-        for causality in args.apply_on:
+        for causality in cli_options.apply_on:
             print(f"     - causality = {causality}")
 
-    for operation in args.operations_list:
+    for operation in cli_options.operations_list:
         print(f"     => {operation}")
         try:
-            fmu.apply_operation(operation, args.apply_on)
+            fmu.apply_operation(operation, cli_options.apply_on)
         except OperationException as reason:
             print(f"ERROR: {reason}")
             sys.exit(-6)
 
-    if args.extract_description:
-        print(f"WRITING ModelDescriptor='{args.extract_description}'")
-        fmu.save_descriptor(args.extract_description)
+    if cli_options.extract_description:
+        print(f"WRITING ModelDescriptor='{cli_options.extract_description}'")
+        fmu.save_descriptor(cli_options.extract_description)
 
-    if args.fmu_output:
-        print(f"WRITING Output='{args.fmu_output}'")
+    if cli_options.fmu_output:
+        print(f"WRITING Output='{cli_options.fmu_output}'")
         try:
-            fmu.repack(args.fmu_output)
+            fmu.repack(cli_options.fmu_output)
         except FMUException as reason:
             print(f"FATAL ERROR: {reason}")
             sys.exit(-5)
