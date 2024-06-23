@@ -10,7 +10,7 @@ from functools import partial
 from typing import Optional
 
 from .fmu_operations import *
-from .checker import OperationCheck
+from .checker import checker_operation_list
 from .help import Help
 
 
@@ -133,7 +133,10 @@ class LogWidget(QTextBrowser):
 
     def __init__(self):
         super().__init__()
-        font = QFont('Courier New')
+        if os.name == 'nt':
+            font = QFont('Consolas')
+        else:
+            font = QFont('Courier New')
         font.setPointSize(10)
         self.setFont(font)
         self.setMinimumWidth(800)
@@ -240,7 +243,7 @@ class FmutoolMainWindow(QWidget):
             ("Add Win64 remoting",    '-add-remoting-win64', 'info',    OperationAddRemotingWin64),
             ("Add Win32 frontend",    '-add-frontend-win32', 'info',    OperationAddFrontendWin32),
             ("Add Win64 frontend",    '-add-frontend-win64', 'info',    OperationAddFrontendWin64),
-            ("Check",                 '-check',              'info',    OperationCheck),
+            ("Check",                 '-check',              'info',    checker_operation_list),
         ]
 
         width = 5
@@ -339,24 +342,29 @@ class FmutoolMainWindow(QWidget):
             except Exception as e:
                 print(f"ERROR: {e}")
 
-    def add_operation(self, name, usage, severity, class_name, x, y, prompt=None, prompt_file=None, arg=None,
+    def add_operation(self, name, usage, severity, operation, x, y, prompt=None, prompt_file=None, arg=None,
                       func=None):
         if prompt:
             def operation_handler():
                 local_arg = self.prompt_string(prompt)
                 if local_arg:
-                    self.apply_operation(class_name(local_arg))
+                    self.apply_operation(operation(local_arg))
         elif prompt_file:
             def operation_handler():
                 local_arg = self.prompt_file(prompt_file)
                 if local_arg:
-                    self.apply_operation(class_name(local_arg))
+                    self.apply_operation(operation(local_arg))
         elif arg:
             def operation_handler():
-                self.apply_operation(class_name(arg))
+                self.apply_operation(operation(arg))
         else:
             def operation_handler():
-                self.apply_operation(class_name())
+                # Checker can be a list of operations!
+                if isinstance(operation, list):
+                    for op in operation:
+                        self.apply_operation(op)
+                else:
+                    self.apply_operation(operation())
 
         button = QPushButton(name)
         self.set_tooltip(button, usage)
