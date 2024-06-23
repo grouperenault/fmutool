@@ -1,7 +1,7 @@
 import argparse
 import sys
 from .fmu_operations import *
-from .checker import OperationCheck
+from .checker import checker_operation_list
 from .version import __version__ as version
 from .help import Help
 
@@ -77,7 +77,7 @@ def cli():
     add_option('-only-outputs', action='append_const', dest='apply_on', const='output')
     # Checker
     add_option('-summary', action='append_const', dest='operations_list', const=OperationSummary())
-    add_option('-check', action="append_const", dest='operations_list', const=OperationCheck())
+    add_option('-check', action='append_const', dest='operations_list', const=checker_operation_list)
 
     cli_options = parser.parse_args()
     # handle the "no operation" use case
@@ -100,7 +100,10 @@ def cli():
         for causality in cli_options.apply_on:
             print(f"     - causality = {causality}")
 
-    for operation in cli_options.operations_list:
+    def flatten(list_of_list: list):
+        return [ x for xs in list_of_list for x in xs ]
+
+    for operation in flatten(cli_options.operations_list):
         print(f"     => {operation}")
         try:
             fmu.apply_operation(operation, cli_options.apply_on)
