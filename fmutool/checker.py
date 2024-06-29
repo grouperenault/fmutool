@@ -7,15 +7,21 @@ from .fmu_operations import OperationAbstract
 
 
 class OperationGenericCheck(OperationAbstract):
+    SUPPORTED_FMI_VERSIONS = ('2.0',)
+
     def __init__(self):
         pass
 
     def __repr__(self):
         return f"FMU Generic Conformity Checks"
 
+    def fmi_attrs(self, attrs):
+        if attrs['fmiVersion'] not in self.SUPPORTED_FMI_VERSIONS:
+            print(f"ERROR: fmutool only support FMI {','.join(self.SUPPORTED_FMI_VERSIONS)} versions.")
+
     def closure(self):
-        print(f"Check rules are not shipped with this open-source implementation.\n"
-              f"If interested in this topic you may contact {author}.")
+        print(f"The modelDescription.xml was parsed successfully. \n"
+              f"Note that the compliance with FMI specification is not checked.")
 
 
 checker_operation_list = [OperationGenericCheck()]
