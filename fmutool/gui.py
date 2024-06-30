@@ -10,7 +10,7 @@ from functools import partial
 from typing import Optional
 
 from .fmu_operations import *
-from .checker import checker_operation_list
+from .checker import checker_list
 from .help import Help
 
 
@@ -243,7 +243,7 @@ class FmutoolMainWindow(QWidget):
             ("Add Win64 remoting",    '-add-remoting-win64', 'info',    OperationAddRemotingWin64),
             ("Add Win32 frontend",    '-add-frontend-win32', 'info',    OperationAddFrontendWin32),
             ("Add Win64 frontend",    '-add-frontend-win64', 'info',    OperationAddFrontendWin64),
-            ("Check",                 '-check',              'info',    checker_operation_list),
+            ("Check",                 '-check',              'info',    checker_list),
         ]
 
         width = 5
@@ -362,7 +362,7 @@ class FmutoolMainWindow(QWidget):
                 # Checker can be a list of operations!
                 if isinstance(operation, list):
                     for op in operation:
-                        self.apply_operation(op)
+                        self.apply_operation(op())
                 else:
                     self.apply_operation(operation())
 
