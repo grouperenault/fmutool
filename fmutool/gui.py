@@ -135,9 +135,10 @@ class LogWidget(QTextBrowser):
         super().__init__()
         if os.name == 'nt':
             font = QFont('Consolas')
+            font.setPointSize(10)
         else:
             font = QFont('Courier New')
-        font.setPointSize(10)
+            font.setPointSize(12)
         self.setFont(font)
         self.setMinimumWidth(800)
         self.setMinimumHeight(480)
