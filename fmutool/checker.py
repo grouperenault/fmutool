@@ -47,7 +47,12 @@ def _add_checkers_from_file(checker_filename: str):
         return
     try:
         checker_module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(checker_module)
+        try:
+            spec.loader.exec_module(checker_module)
+        except (ModuleNotFoundError, SyntaxError) as error:
+            print(f"ERROR: Cannot load {checker_filename}: {error})")
+            return
+
         for checker_name, checker_class in inspect.getmembers(checker_module, inspect.isclass):
             if OperationAbstract in checker_class.__bases__:
                 checker_list.append(checker_class)
