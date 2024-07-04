@@ -90,6 +90,7 @@ class Manipulation:
                         self.keep_port(attrs['name'])
                 else:
                     self.keep_port(attrs['name'])
+                    self.skip_until = name   # do not read inner tags
             elif name == 'CoSimulation':
                 self.operation.cosimulation_attrs(attrs)
             elif name == 'DefaultExperiment':
@@ -98,6 +99,8 @@ class Manipulation:
                 self.operation.fmi_attrs(attrs)
             elif name == 'Unknown':
                 self.unknown_attrs(attrs)
+            elif name in ('Real', 'Integer', 'String', 'Boolean'):
+                self.operation.scalar_type(name, attrs)
 
         except ManipulationSkipTag:
             self.skip_until = name
@@ -172,6 +175,9 @@ class OperationAbstract:
     def experiment_attrs(self, attrs):
         pass
 
+    def scalar_type(self, type_name, attrs):
+        pass
+
     def closure(self):
         pass
 
@@ -193,23 +199,41 @@ class OperationSaveNamesToCSV(OperationAbstract):
         self.output_filename = filename
         self.csvfile = open(filename, 'w', newline='')
         self.writer = csv.writer(self.csvfile, delimiter=';', quotechar="'", quoting=csv.QUOTE_MINIMAL)
-        self.writer.writerow(['name', 'newName', 'valueReference', 'causality', 'variability'])
+        self.writer.writerow(['name', 'newName', 'valueReference', 'causality', 'variability', 'scalarType',
+                              'startValue'])
+        self.name = None
+        self.vr = None
+        self.variability = None
+        self.causality = None
+
+    def reset(self):
+        self.name = None
+        self.vr = None
+        self.variability = None
+        self.causality = None
 
     def closure(self):
         self.csvfile.close()
 
     def scalar_attrs(self, attrs):
-        name = attrs['name']
-        vr = attrs['valueReference']
-        causality = self.scalar_get_causality(attrs)
+        self.name = attrs['name']
+        self.vr = attrs['valueReference']
+        self.causality = self.scalar_get_causality(attrs)
 
         try:
-            variability = attrs['variability']
+            self.variability = attrs['variability']
         except KeyError:
-            variability = 'continuous'   # Default value according to FMI Specifications.
+            self.variability = 'continuous'   # Default value according to FMI Specifications.
 
-        self.writer.writerow([name, name, vr, causality, variability])
         return 0
+
+    def scalar_type(self, type_name, attrs):
+        if "start" in attrs:
+            start = attrs["start"]
+        else:
+            start = ""
+        self.writer.writerow([self.name, self.name, self.vr, self.causality, self.variability, type_name, start])
+        self.reset()
 
 
 class OperationStripTopLevel(OperationAbstract):

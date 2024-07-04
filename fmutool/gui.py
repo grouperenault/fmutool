@@ -395,7 +395,6 @@ class FmutoolMainWindow(QWidget):
                 filename, ok = QFileDialog.getSaveFileName(self, "Select a file",
                                                            default_dir, "CSV files (*.csv)")
 
-            print(f"{filename}, {ok}")
             if ok and filename:
                 return filename
         return None
