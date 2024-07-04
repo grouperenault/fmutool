@@ -1,4 +1,4 @@
-## Version 
+## Version 1.6.2
 * ADDED: Ability to add your own FMU Checker.
 * ADDED: SaveNamesToCSV will dump scalar types and start values.
 * CHANGED: Default (Generic) Checker checks the `modelDescription.xml` conformity against the XSD specification file.
