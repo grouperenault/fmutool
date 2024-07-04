@@ -1,6 +1,6 @@
-name;newName;valueReference;causality;variability
-parameter.h;parameter.h;0;local;continuous
-out.der(h);out.der(h);1;local;continuous
-out.v;out.v;2;local;continuous
-out.der(v);out.der(v);3;local;continuous
-e;e;5;parameter;tunable
+name;newName;valueReference;causality;variability;scalarType;startValue
+parameter.h;parameter.h;0;local;continuous;Real;1
+out.der(h);out.der(h);1;local;continuous;Real;
+out.v;out.v;2;local;continuous;Real;0
+out.der(v);out.der(v);3;local;continuous;Real;
+e;e;5;parameter;tunable;Real;0.7

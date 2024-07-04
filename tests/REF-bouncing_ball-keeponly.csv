@@ -1,2 +1,2 @@
-name;newName;valueReference;causality;variability
-e;e;5;parameter;tunable
+name;newName;valueReference;causality;variability;scalarType;startValue
+e;e;5;parameter;tunable;Real;0.7

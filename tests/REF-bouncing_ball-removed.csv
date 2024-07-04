@@ -1,6 +1,6 @@
-name;newName;valueReference;causality;variability
-h;h;0;local;continuous
-der(h);der(h);1;local;continuous
-v;v;2;local;continuous
-der(v);der(v);3;local;continuous
-g;g;4;parameter;fixed
+name;newName;valueReference;causality;variability;scalarType;startValue
+h;h;0;local;continuous;Real;1
+der(h);der(h);1;local;continuous;Real;
+v;v;2;local;continuous;Real;0
+der(v);der(v);3;local;continuous;Real;
+g;g;4;parameter;fixed;Real;9.81
