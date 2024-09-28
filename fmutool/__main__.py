@@ -1,9 +1,35 @@
 import argparse
+from colorama import Fore, Style, init
+import logging
 import sys
+
 from .fmu_operations import *
 from .checker import checker_list
 from .version import __version__ as version
 from .help import Help
+
+
+def setup_logger():
+    class CustomFormatter(logging.Formatter):
+        def format(self, record):
+            log_format = "%(levelname)-8s | %(message)s"
+            format_per_level = {
+                logging.DEBUG: str(Fore.BLUE) + log_format,
+                logging.INFO: str(Fore.CYAN) + log_format,
+                logging.WARNING: str(Fore.YELLOW) + log_format,
+                logging.ERROR: str(Fore.RED) + log_format,
+                logging.CRITICAL: str(Fore.RED + Style.BRIGHT) + log_format,
+            }
+            formatter = logging.Formatter(format_per_level[record.levelno])
+            return formatter.format(record)
+    init()
+    logger = logging.getLogger("fmutool")
+    handler = logging.StreamHandler(stream=sys.stdout)
+    handler.setFormatter(CustomFormatter())
+    logger.addHandler(handler)
+    logger.setLevel(logging.INFO)
+
+    return logger
 
 
 def gui():
@@ -101,7 +127,7 @@ def cli():
             print(f"     - causality = {causality}")
 
     def flatten(list_of_list: list):
-        return [ x for xs in list_of_list for x in xs ]
+        return [x for xs in list_of_list for x in xs]
 
     for operation in flatten(cli_options.operations_list):
         print(f"     => {operation}")
@@ -127,6 +153,7 @@ def cli():
 
 
 def main():
+    setup_logger()
     if len(sys.argv) == 1:
         gui()
     else:
