@@ -1,0 +1,4 @@
+rule;from_fmu;from_port;to_fmu;to_port
+FMU;bb_position.fmu;;;
+FMU;bb_velocity.fmu;;;
+

@@ -4,6 +4,7 @@ import os
 
 sys.path.insert(0, os.path.relpath(os.path.join(os.path.dirname(__file__), "..")))
 from fmutool.fmu_operations import *
+from fmutool.fmu_container import *
 
 
 class FMUToolTestSuite(unittest.TestCase):
@@ -12,7 +13,7 @@ class FMUToolTestSuite(unittest.TestCase):
         self.fmu_filename = "bouncing_ball.fmu"
 
     def assert_identical_files(self, filename1, filename2):
-        with open(filename1, mode="rt", newline=None) as a,\
+        with open(filename1, mode="rt", newline=None) as a, \
                 open(filename2, mode="rt", newline=None) as b:
             self.assertTrue(all(lineA == lineB for lineA, lineB in zip(a, b)))
 
@@ -53,6 +54,23 @@ class FMUToolTestSuite(unittest.TestCase):
     def test_keep_only_regexp(self):
         self.assert_operation_match_ref("bouncing_ball-keeponly.fmu",
                                         OperationKeepOnlyRegexp("e"))
+
+
+class FMUContainerTestSuite(unittest.TestCase):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def assert_identical_files(self, filename1, filename2):
+        with open(filename1, mode="rt", newline=None) as a, \
+                open(filename2, mode="rt", newline=None) as b:
+            self.assertTrue(all(lineA == lineB for lineA, lineB in zip(a, b)))
+
+    def test_bouncing(self):
+        csv_description = FMUContainerSpecReader("containers/bouncing_ball")
+        container = csv_description.read_csv(Path("bouncing.csv"))
+        container.make_fmu("bouncing.fmu", debug=True, mt=True)
+        self.assert_identical_files("containers/bouncing_ball/REF_container.txt",
+                                    "containers/bouncing_ball/bouncing/resources/container.txt")
 
 
 if __name__ == '__main__':

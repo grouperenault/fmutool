@@ -64,7 +64,7 @@ add_executable(server_sm
 
 set_target_properties(server_sm PROPERTIES COMPILE_OPTIONS "${BITNESS}" LINK_FLAGS "${BITNESS}")
 target_include_directories(server_sm PRIVATE
-    include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../fmi
     ${CMAKE_CURRENT_BINARY_DIR})
 
 if (UNIX)
@@ -74,10 +74,8 @@ if (UNIX)
     endif()
 endif ()
 
-add_custom_command(TARGET server_sm POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
-    "$<TARGET_FILE:server_sm>"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../fmutool/remoting/${FMI_PLATFORM}"
-)
+set_target_properties(server_sm PROPERTIES
+					  RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_CURRENT_SOURCE_DIR}/../fmutool/resources/${FMI_PLATFORM}")
 
 
 #
@@ -94,18 +92,15 @@ add_library(client_sm SHARED
 set_target_properties(client_sm PROPERTIES PREFIX "" COMPILE_OPTIONS "${BITNESS}" LINK_FLAGS "${BITNESS}")
 
 target_include_directories(client_sm PRIVATE
-    include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../fmi
     ${CMAKE_CURRENT_BINARY_DIR})
 
 if (UNIX AND NOT APPLE)
         target_link_libraries(client_sm rt Threads::Threads)
 endif()
 
-add_custom_command(TARGET client_sm POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
-    "$<TARGET_FILE:client_sm>"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../fmutool/remoting/${FMI_PLATFORM}"
-)
-
+set_target_properties(client_sm PROPERTIES
+					  RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_CURRENT_SOURCE_DIR}/../fmutool/resources/${FMI_PLATFORM}")
 
 #
 # test_sizeof
@@ -114,10 +109,6 @@ if (BUILD_TESTER)
     add_executable(test_sizeof
         ${CMAKE_CURRENT_SOURCE_DIR}/test_sizeof.c
         remote.h
-    )
-
-    target_include_directories(test_sizeof PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/../fmpy/c-code
     )
 
     add_custom_command(OUTPUT test_sizeof.c
@@ -131,10 +122,11 @@ if (BUILD_TESTER)
     )
     #target_link_libraries(test_server client_sm)
     target_include_directories(test_server PRIVATE
-        include)
+        ${CMAKE_CURRENT_SOURCE_DIR}/../fmi
+    )
 
     target_include_directories(test_sizeof PRIVATE
-        include
+        ${CMAKE_CURRENT_SOURCE_DIR}/../fmi
     )
 
 endif ()
