@@ -138,29 +138,65 @@ jobs:
         uses: actions/upload-artifact@master
         with:
           name: remoting-linux64
-          path: ${{ github.workspace }}/fmutool/remoting/linux64
+          path: ${{ github.workspace }}/fmutool/resources/linux64
+          retention-days: 1
+  container-windows64:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set reusable strings
+        # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
+        id: strings
+        shell: bash
+        run: |
+          echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+
+      - name: Configure CMake
+        # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
+        # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
+        run: >
+          cmake -B ${{ steps.strings.outputs.build-output-dir }}
+          -DCMAKE_CXX_COMPILER=cl
+          -DCMAKE_C_COMPILER=cl
+          -DCMAKE_BUILD_TYPE=Release
+          -A x64
+          -S ${{ github.workspace }}/container
+
+      - name: Build
+        # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
+        run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config Release
+      - name: Archive Artifacts
+        uses: actions/upload-artifact@master
+        with:
+          name: container-win64
+          path: ${{ github.workspace }}/fmutool/resources/win64
           retention-days: 1
   package:
-    needs: [remoting-windows32, remoting-windows64, remoting-linux32, remoting-linux64]
+    needs: [remoting-windows32, remoting-windows64, remoting-linux32, remoting-linux64, container-windows64]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
     - uses: actions/download-artifact@master
       with:
         name: remoting-win64
-        path: ${{ github.workspace }}/fmutool/remoting/win64/
+        path: ${{ github.workspace }}/fmutool/resources/win64/
     - uses: actions/download-artifact@master
       with:
         name: remoting-win32
-        path: ${{ github.workspace }}/fmutool/remoting/win32/
+        path: ${{ github.workspace }}/fmutool/resources/win32/
     - uses: actions/download-artifact@master
       with:
         name: remoting-linux32
-        path: ${{ github.workspace }}/fmutool/remoting/linux32/
+        path: ${{ github.workspace }}/fmutool/resources/linux32/
     - uses: actions/download-artifact@master
       with:
         name: remoting-linux64
-        path: ${{ github.workspace }}/fmutool/remoting/linux64/
+        path: ${{ github.workspace }}/fmutool/resources/linux64/
+    - uses: actions/download-artifact@master
+      with:
+        name: container-windows64
+        path: ${{ github.workspace }}/fmutool/resources/windows64/
     - name: Set up Python 3.10
       uses: actions/setup-python@v3
       with:
