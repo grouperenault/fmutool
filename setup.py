@@ -25,27 +25,30 @@ setup(
     version=version,
     packages=["fmutool",
               ],
-    package_data={"fmutool": ["remoting/win32/client_sm.dll",
-                              "remoting/win32/server_sm.exe",
-                              "remoting/win64/client_sm.dll",
-                              "remoting/win64/server_sm.exe",
-                              "remoting/linux64/client_sm.so",
-                              "remoting/linux64/server_sm",
-                              "remoting/linux32/client_sm.so",
-                              "remoting/linux32/server_sm",
-                              "remoting/license.txt",
+    package_data={"fmutool": ["resources/win32/client_sm.dll",
+                              "resources/win32/server_sm.exe",
+                              "resources/win64/client_sm.dll",
+                              "resources/win64/server_sm.exe",
+                              "resources/win64/container.dll",
+                              "resources/linux64/client_sm.so",
+                              "resources/linux64/server_sm",
+                              "resources/linux32/client_sm.so",
+                              "resources/linux32/server_sm",
+                              "resources/license.txt",
                               "resources/*.png"],
                   },
     entry_points={"console_scripts": ["fmutool = fmutool.__main__:main"]},
     author=author,
     url="https://github.com/grouperenault/fmutool/",
     description="FMUTool is a python application which help to modify a Functional Mock-up Units (FMUs) "
-                "without recompilation",
+                "without recompilation or to group them into FMU Containers",
     long_description="""FMUTool is a python application which help to modify a Functional Mock-up Units (FMUs) 
 without recompilation. It mainly modifies the `modelDescription.xml` file. It is highly customizable.
 
 Manipulating the `modelDescription.xml` can be a dangerous thing! Communicating with the FMU-developer and adapting
 the way the FMU is generated, is the preferable when possible.
+
+FMUTool also allows to group FMU's inside Containers.
     """,
 )
 

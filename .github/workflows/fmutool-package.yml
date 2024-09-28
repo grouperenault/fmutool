@@ -195,7 +195,7 @@ jobs:
         path: ${{ github.workspace }}/fmutool/resources/linux64/
     - uses: actions/download-artifact@master
       with:
-        name: container-windows64
+        name: container-win64
         path: ${{ github.workspace }}/fmutool/resources/windows64/
     - name: Set up Python 3.10
       uses: actions/setup-python@v3
