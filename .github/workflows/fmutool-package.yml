@@ -4,8 +4,6 @@ name: Release FMUTOOL
 
 on:
   push:
-    tags:
-      - '*'
 
 permissions:
   id-token: write
