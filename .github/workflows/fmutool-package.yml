@@ -4,7 +4,6 @@ name: Release FMUTOOL
 
 on:
   push:
-    branches: [main]
     tags:
       - '*'
 
@@ -12,7 +11,7 @@ permissions:
   id-token: write
 
 jobs:
-  compile-windows32:
+  remoting-windows32:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -41,10 +40,10 @@ jobs:
       - name: Archive Artifacts
         uses: actions/upload-artifact@master
         with:
-          name: binaries-win32
-          path: ${{ github.workspace }}/fmutool/remoting/win32/
+          name: remoting-win32
+          path: ${{ github.workspace }}/fmutool/resources/win32/
           retention-days: 1
-  compile-windows64:
+  remoting-windows64:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -73,10 +72,10 @@ jobs:
       - name: Archive Artifacts
         uses: actions/upload-artifact@master
         with:
-          name: binaries-win64
-          path: ${{ github.workspace }}/fmutool/remoting/win64
+          name: remoting-win64
+          path: ${{ github.workspace }}/fmutool/resources/win64
           retention-days: 1
-  compile-linux32:
+  remoting-linux32:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -109,10 +108,10 @@ jobs:
       - name: Archive Artifacts
         uses: actions/upload-artifact@master
         with:
-          name: binaries-linux32
-          path: ${{ github.workspace }}/fmutool/remoting/linux32/client_sm.so
+          name: remoting-linux32
+          path: ${{ github.workspace }}/fmutool/resources/linux32
           retention-days: 1
-  compile-linux64:
+  remoting-linux64:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -140,29 +139,29 @@ jobs:
       - name: Archive Artifacts
         uses: actions/upload-artifact@master
         with:
-          name: binaries-linux64
+          name: remoting-linux64
           path: ${{ github.workspace }}/fmutool/remoting/linux64
           retention-days: 1
   package:
-    needs: [compile-windows32, compile-windows64, compile-linux32, compile-linux64]
+    needs: [remoting-windows32, remoting-windows64, remoting-linux32, remoting-linux64]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
     - uses: actions/download-artifact@master
       with:
-        name: binaries-win64
+        name: remoting-win64
         path: ${{ github.workspace }}/fmutool/remoting/win64/
     - uses: actions/download-artifact@master
       with:
-        name: binaries-win32
+        name: remoting-win32
         path: ${{ github.workspace }}/fmutool/remoting/win32/
     - uses: actions/download-artifact@master
       with:
-        name: binaries-linux32
+        name: remoting-linux32
         path: ${{ github.workspace }}/fmutool/remoting/linux32/
     - uses: actions/download-artifact@master
       with:
-        name: binaries-linux64
+        name: remoting-linux64
         path: ${{ github.workspace }}/fmutool/remoting/linux64/
     - name: Set up Python 3.10
       uses: actions/setup-python@v3
