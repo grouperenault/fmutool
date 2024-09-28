@@ -50,6 +50,12 @@ the way the FMU is generated, is the preferable when possible.
 
 FMUTool also allows to group FMU's inside Containers.
     """,
+    install_requires=[
+        "PyQt5 >= 5.15.10",
+        "xmlschema >= 3.3.1",
+        "elementpath >= 4.4.0",
+        "colorama >= 0.4.6",
+    ],
 )
 
 os.remove("fmutool/__version__.py")
