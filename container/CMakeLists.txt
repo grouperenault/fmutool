@@ -19,7 +19,7 @@ add_library(container SHARED
 		library.c	library.h
 		logger.c    logger.h)
 set_target_properties(container PROPERTIES PREFIX "")
-target_include_directories(client_sm PRIVATE
+target_include_directories(container PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/../fmi
 )
 set_target_properties(container PROPERTIES
