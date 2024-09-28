@@ -48,7 +48,7 @@ without recompilation. It mainly modifies the `modelDescription.xml` file. It is
 Manipulating the `modelDescription.xml` can be a dangerous thing! Communicating with the FMU-developer and adapting
 the way the FMU is generated, is the preferable when possible.
 
-FMUTool also allows to group FMU's inside Containers.
+FMUTool also allows to group FMU's inside FMU Containers.
     """,
     install_requires=[
         "PyQt5 >= 5.15.10",
