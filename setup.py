@@ -37,7 +37,8 @@ setup(
                               "resources/license.txt",
                               "resources/*.png"],
                   },
-    entry_points={"console_scripts": ["fmutool = fmutool.__main__:main"]},
+    entry_points={"console_scripts": ["fmutool = fmutool.cli:fmutool"
+                                      "fmucontainer = fmutool.cli:fmucontainer"]},
     author=author,
     url="https://github.com/grouperenault/fmutool/",
     description="FMUTool is a python application which help to modify a Functional Mock-up Units (FMUs) "
