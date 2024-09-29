@@ -16,3 +16,7 @@ tests/bouncing_ball-win32.fmu
 remoting/out
 remoting/build
 dist
+tests/containers/bouncing_ball/bouncing
+tests/containers/bouncing_ball/bouncing.fmu
+tests/containers/bouncing_ball/bouncing_auto.fmu
+tests/containers/bouncing_ball/bouncing_unlinked.fmu

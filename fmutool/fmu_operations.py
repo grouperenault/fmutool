@@ -7,6 +7,7 @@ import tempfile
 import xml.parsers.expat
 import zipfile
 import hashlib
+from pathlib import Path
 
 
 class FMU:
@@ -313,14 +314,15 @@ class OperationAddRemotingWinAbstract(OperationAbstract):
         else:
             os.mkdir(fmu_bin[self.bitness_to])
 
-        shutil.copyfile(os.path.join(os.path.dirname(__file__), "remoting", self.bitness_to, "client_sm.dll"),
-                        os.path.join(fmu_bin[self.bitness_to], attrs['modelIdentifier'] + ".dll"))
+        from_path = Path(__file__).parent / "resources" / self.bitness_to
+        shutil.copyfile(from_path / "client_sm.dll",
+                        Path(fmu_bin[self.bitness_to]) / Path(attrs['modelIdentifier']).with_suffix(".dll"))
 
-        shutil.copyfile(os.path.join(os.path.dirname(__file__), "remoting", self.bitness_from, "server_sm.exe"),
-                        os.path.join(fmu_bin[self.bitness_from], "server_sm.exe"))
+        shutil.copyfile(from_path / "server_sm.exe",
+                        Path(fmu_bin[self.bitness_from]) / "server_sm.exe")
 
-        shutil.copyfile(os.path.join(os.path.dirname(__file__), "remoting", "license.txt"),
-                        os.path.join(fmu_bin[self.bitness_to], "license.txt"))
+        shutil.copyfile(Path(__file__).parent / "resources" / "license.txt",
+                        Path(fmu_bin[self.bitness_to]) / "license.txt")
 
 
 class OperationAddRemotingWin64(OperationAddRemotingWinAbstract):
