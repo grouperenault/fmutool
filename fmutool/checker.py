@@ -40,7 +40,7 @@ class OperationGenericCheck(OperationAbstract):
 checker_list = [OperationGenericCheck]
 
 
-def _add_checkers_from_file(checker_filename: str):
+def add_from_file(checker_filename: str):
     spec = importlib.util.spec_from_file_location(checker_filename, checker_filename)
     if not spec:
         print(f"ERROR: Cannot load {checker_filename}. Is this a python file?")
@@ -60,16 +60,3 @@ def _add_checkers_from_file(checker_filename: str):
 
     except AttributeError:
         print(f"ERROR: {checker_filename} should implement class 'OperationCheck'")
-
-
-def _add_checkers(variable_name: str):
-    checkers_folder = os.getenv(variable_name)
-    if checkers_folder:
-        if os.path.isdir(checkers_folder):
-            for filename in glob.glob(os.path.join(checkers_folder, "*.py")):
-                _add_checkers_from_file(filename)
-        else:
-            print(f"ERROR: {variable_name} should point to a valid folder.")
-
-
-_add_checkers("FMUTOOL_CHECKER_DIR")

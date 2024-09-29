@@ -13,6 +13,6 @@ Every class derived from `OperationAbstract` will be considered as a checker and
 
 ### Run `fmutool` with your checker
 
-In order to let `fmutool` know where the file implementing your checker are, you can use `FMUTOOL_CHECKER_DIR` 
-environment variable before invoking `fmutool`. The pointed directory may contain multiple python files and so
-multiple checkers. All of them will be run during the checks runtime.
+In order to let `fmutool` know where the file implementing your checker are, you can use `fmutool.checker.add_from_file` 
+function before invoking `fmutool`. The pointed file may contain multiple classes derivative from `OperationAbstract`.
+All of them will be run during the checks runtime.
