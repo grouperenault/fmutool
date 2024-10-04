@@ -56,7 +56,8 @@ class FMUPort:
             "name": name,
             "valueReference": vr,
             "causality": causality
-        } | self.attrs
+        }
+        scalar_attrs.update(self.attrs)
 
         scalar_attrs_str = " ".join([f'{key}="{value}"' for (key, value) in scalar_attrs.items()])
 
@@ -436,6 +437,18 @@ class FMUContainer:
         xml_file.write("""  </ModelVariables>
 
   <ModelStructure>
+    <Outputs>
+""")
+
+        index_offset = len(self.locals) + len(self.inputs) + 1
+        for i, _ in enumerate(self.outputs.keys()):
+            print(f'      <Unknown index="{index_offset+i}"/>', file=xml_file)
+        xml_file.write("""    </Outputs>
+    <InitialUnknowns>
+""")
+        for i, _ in enumerate(self.outputs.keys()):
+            print(f'      <Unknown index="{index_offset+i}"/>', file=xml_file)
+        xml_file.write("""    </InitialUnknowns>
   </ModelStructure>
 
 </fmiModelDescription>
