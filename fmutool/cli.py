@@ -51,7 +51,7 @@ def fmutool():
 
     parser = argparse.ArgumentParser(prog='fmutool',
                                      description="Manipulate a FMU by modifying its 'modelDescription.xml'",
-                                     formatter_class=make_wide(argparse.ArgumentDefaultsHelpFormatter),
+                                     formatter_class=make_wide(argparse.HelpFormatter),
                                      add_help=False,
                                      epilog="see: https://github.com/grouperenault/fmutool/blob/main/README.md")
 
@@ -155,6 +155,8 @@ def fmucontainer():
                                      add_help=False,
                                      epilog="see: https://github.com/grouperenault/fmutool/blob/main/"
                                             "container/README.md")
+
+    parser.add_argument('-h', '-help', action="help")
 
     parser.add_argument("-fmu-directory", action="store", dest="fmu_directory", required=True,
                         help="Directory containing initial FMU’s and used to generate containers.")
