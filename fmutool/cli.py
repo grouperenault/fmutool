@@ -180,6 +180,9 @@ def fmucontainer():
     parser.add_argument("-mt", action="store_true", dest="mt", default=False,
                         help="Enable Multi-Threaded mode for the generated container.")
 
+    parser.add_argument("-profile", action="store_true", dest="profiling", default=False,
+                        help="Enable Profiling mode for the generated container.")
+
     config = parser.parse_args()
 
     if config.debug:
@@ -201,7 +204,8 @@ def fmucontainer():
             container.add_implicit_rule(auto_input=config.auto_input,
                                         auto_output=config.auto_output,
                                         auto_link=config.auto_link)
-            container.make_fmu(container_filename, step_size=step_size, debug=config.debug, mt=config.mt)
+            container.make_fmu(container_filename, step_size=step_size, debug=config.debug, mt=config.mt,
+                               profiling=config.profiling)
         except (FileNotFoundError, FMUContainerError, FMUException) as e:
             logger.error(f"Cannot build container from '{filename_description}': {e}")
             continue

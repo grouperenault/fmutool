@@ -19,6 +19,7 @@ typedef struct {
 ----------------------------------------------------------------------------*/
 typedef struct container_s {
 	int							mt;
+	int							profiling;
 	int							nb_fmu;
 	fmi2CallbackLogger			logger;
 	fmi2ComponentEnvironment	environment;
