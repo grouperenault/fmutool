@@ -141,6 +141,7 @@ typedef struct {
 
 typedef struct {
 	char       					*identifier;
+    int                         index;
 	library_t                   library;
 	char						resource_dir[FMU_PATH_MAX_LEN];
 	char						*guid;

@@ -10,7 +10,6 @@ typedef unsigned int profile_tic_t;
 
 typedef struct {
     profile_tic_t   current_tic;            /* ms */
-    double          current_rt_ratio;
     double          total_ellapsed;
 } profile_t;
 
@@ -22,6 +21,6 @@ typedef struct {
 extern profile_t *profile_new(void);
 extern void profile_free(profile_t *profile);
 extern void profile_tic(profile_t *profile);
-extern void profile_toc(profile_t *profile, double current_time);
+extern double profile_toc(profile_t *profile, double current_time);
 
 #endif

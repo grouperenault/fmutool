@@ -141,6 +141,7 @@ int fmu_load_from_directory(container_t *container, int i, const char *directory
     fmu_t *fmu = &container->fmu[i];
     fmu->container = container;
     fmu->identifier = identifier;
+    fmu->index = i;
     
 
     char library_filename[FMU_PATH_MAX_LEN];
@@ -244,9 +245,7 @@ fmi2Status fmuDoStep(const fmu_t *fmu,
                                                      noSetFMUStatePriorToCurrentPoint);
 
     if (fmu->profile) {
-        profile_toc(fmu->profile, currentCommunicationPoint+communicationStepSize);
-        logger(fmu->container, fmi2Error, "RT Ratio %f (ellapsed=%f, time=%f)", fmu->profile->current_rt_ratio, 
-        fmu->profile->total_ellapsed, currentCommunicationPoint+communicationStepSize);
+        fmu->container->reals[fmu->index] = profile_toc(fmu->profile, currentCommunicationPoint+communicationStepSize);
     }
 
     return status;

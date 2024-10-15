@@ -13,7 +13,6 @@ profile_t *profile_new(void) {
     profile_t *profile = malloc(sizeof(*profile));
     
 	profile->current_tic = 0;
-	profile->current_rt_ratio = 0.0;
 	profile->total_ellapsed = 0.0;
 
     return profile;
@@ -42,7 +41,7 @@ void profile_tic(profile_t *profile) {
 }
 
 
-void profile_toc(profile_t *profile, double current_time) {
+double profile_toc(profile_t *profile, double current_time) {
 	profile_tic_t now;
 	
 #ifdef WIN32
@@ -56,7 +55,6 @@ void profile_toc(profile_t *profile, double current_time) {
 #endif
 
     profile->total_ellapsed += (now - profile->current_tic) / 1000.0;
-	profile->current_rt_ratio = current_time / profile->total_ellapsed;
-	
-	return;
+	return current_time / profile->total_ellapsed;
 }
+
