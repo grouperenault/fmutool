@@ -231,8 +231,8 @@ class FMUContainer:
             container_port_name = from_port_name
 
         cport_from = ContainerPort(self.get_fmu(from_fmu_filename), from_port_name)
-        if not cport_from.port.causality == "output":  # check causality
-            raise FMUException(f"{cport_from} is {cport_from.port.causality} instead of OUTPUT")
+        if cport_from.port.causality not in ("output", "local"):  # check causality
+            raise FMUException(f"{cport_from} is {cport_from.port.causality} instead of OUTPUT or LOCAL")
 
         logger.debug(f"OUTPUT: {from_fmu_filename}:{from_port_name}")
         self.mark_ruled(cport_from, 'OUTPUT')
