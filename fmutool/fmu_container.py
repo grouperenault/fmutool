@@ -18,11 +18,12 @@ class FMUPort:
     def __init__(self, attrs: Dict[str, str]):
         self.name = attrs["name"]
         self.vr = int(attrs["valueReference"])
-        self.causality = attrs["causality"]
+        self.causality = attrs.get("causality", "local")
         self.attrs = attrs.copy()
         self.attrs.pop("name")
         self.attrs.pop("valueReference")
-        self.attrs.pop("causality")
+        if "causality" in self.attrs:
+            self.attrs.pop("causality")
         self.type_name = None
         self.child = None
 
@@ -52,10 +53,13 @@ class FMUPort:
         if causality is None:
             causality = self.causality
 
+        variability = "continuous" if self.type_name == "Real" else "discrete"
+
         scalar_attrs = {
             "name": name,
             "valueReference": vr,
-            "causality": causality
+            "causality": causality,
+            "variability": variability,
         }
         scalar_attrs.update(self.attrs)
 
@@ -172,6 +176,7 @@ class ValueReferenceTable:
         vr = self.vr_table[type_name]
         self.vr_table[type_name] += 1
         return vr
+
 
 class FMUContainer:
     def __init__(self, identifier: str, fmu_directory: Union[str, Path]):
