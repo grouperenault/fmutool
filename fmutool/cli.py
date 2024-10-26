@@ -158,8 +158,9 @@ def fmucontainer():
 
     parser.add_argument('-h', '-help', action="help")
 
-    parser.add_argument("-fmu-directory", action="store", dest="fmu_directory", required=True,
-                        help="Directory containing initial FMU’s and used to generate containers.")
+    parser.add_argument("-fmu-directory", action="store", dest="fmu_directory", required=False, default=".",
+                        help="Directory containing initial FMU’s and used to generate containers. "
+                             "If not defined, current directory is used.")
 
     parser.add_argument("-container", action="append", dest="container_descriptions_list", default=[],
                         metavar="filename.csv:step_size",
