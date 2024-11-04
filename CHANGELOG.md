@@ -3,6 +3,7 @@
 ## Version 1.7.3
 * ADDED: `fmucontainer` supports `-profile` option to expose RT ratio of embedded FMUs during simulation
 * ADDED: Ability to expose local variables of embedded FMUs at container level
+* FIXED: `fmucontainer` handles missing causality and handle better variability
 
 ## Version 1.7.2
 * FIXED: handle `<ModelStructure>` section for `fmucontainer`
