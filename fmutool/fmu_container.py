@@ -166,10 +166,12 @@ class ValueReferenceTable:
         }
 
     def get_vr(self, cport: ContainerPort) -> int:
-        vr = self.vr_table[cport.port.type_name]
-        self.vr_table[cport.port.type_name] += 1
-        return vr
+        return self.add_vr(cport.port.type_name)
 
+    def add_vr(self, type_name:str) -> int:
+        vr = self.vr_table[type_name]
+        self.vr_table[type_name] += 1
+        return vr
 
 class FMUContainer:
     def __init__(self, identifier: str, fmu_directory: Union[str, Path]):
@@ -229,8 +231,8 @@ class FMUContainer:
             container_port_name = from_port_name
 
         cport_from = ContainerPort(self.get_fmu(from_fmu_filename), from_port_name)
-        if not cport_from.port.causality == "output":  # check causality
-            raise FMUException(f"{cport_from} is {cport_from.port.causality} instead of OUTPUT")
+        if cport_from.port.causality not in ("output", "local"):  # check causality
+            raise FMUException(f"{cport_from} is {cport_from.port.causality} instead of OUTPUT or LOCAL")
 
         logger.debug(f"OUTPUT: {from_fmu_filename}:{from_port_name}")
         self.mark_ruled(cport_from, 'OUTPUT')
@@ -344,7 +346,8 @@ class FMUContainer:
         if nb_error:
             raise FMUContainerError(f"Some ports are not connected.")
 
-    def make_fmu(self, fmu_filename: Union[str, Path], step_size: Union[float, None] = None, debug=False, mt=False):
+    def make_fmu(self, fmu_filename: Union[str, Path], step_size: Union[float, None] = None, debug=False, mt=False,
+                 profiling=False):
         if isinstance(fmu_filename, str):
             fmu_filename = Path(fmu_filename)
 
@@ -358,15 +361,15 @@ class FMUContainer:
         base_directory = self.fmu_directory / fmu_filename.with_suffix('')
         resources_directory = self.make_fmu_skeleton(base_directory)
         with open(base_directory / "modelDescription.xml", "wt") as xml_file:
-            self.make_fmu_xml(xml_file, step_size)
+            self.make_fmu_xml(xml_file, step_size, profiling)
         with open(resources_directory / "container.txt", "wt") as txt_file:
-            self.make_fmu_txt(txt_file, step_size, mt)
+            self.make_fmu_txt(txt_file, step_size, mt, profiling)
 
         self.make_fmu_package(base_directory, fmu_filename)
         if not debug:
             self.make_fmu_cleanup(base_directory)
 
-    def make_fmu_xml(self, xml_file, step_size):
+    def make_fmu_xml(self, xml_file, step_size: float, profiling: bool):
         vr_table = ValueReferenceTable()
 
         timestamp = datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
@@ -416,6 +419,11 @@ class FMUContainer:
 
   <ModelVariables>
 """)
+        if profiling:
+            for fmu in self.execution_order:
+                vr = vr_table.add_vr("Real")
+                name = f"container.{fmu.model_identifier}.rt_ratio"
+                print(f'<ScalarVariable valueReference="{vr}" name="{name}" causality="local"><Real /></ScalarVariable>', file=xml_file)
 
         # Local variable should be first to ensure to attribute them the lowest VR.
         for local in self.locals.values():
@@ -454,11 +462,17 @@ class FMUContainer:
 </fmiModelDescription>
 """)
 
-    def make_fmu_txt(self, txt_file, step_size: float, mt: bool):
+    def make_fmu_txt(self, txt_file, step_size: float, mt: bool, profiling: bool):
         if mt:
             print("# Use MT\n1", file=txt_file)
         else:
             print("# Don't use MT\n0", file=txt_file)
+
+        if profiling:
+            print("# Profiling ENABLED\n1", file=txt_file)
+        else:
+            print("# Profiling DISABLED\n0", file=txt_file)
+
         print(f"# Internal time step in seconds", file=txt_file)
         print(f"{step_size}", file=txt_file)
         print(f"# NB of embedded FMU's", file=txt_file)
@@ -513,14 +527,23 @@ class FMUContainer:
 
         print(f"# NB local variables Real, Integer, Boolean, String", file=txt_file)
         for type_name in type_names_list:
-            print(f"{len(locals_per_type[type_name])} ", file=txt_file, end='')
+            nb = len(locals_per_type[type_name])
+            if profiling and type_name == "Real":
+                nb += len(self.execution_order)
+            print(f"{nb} ", file=txt_file, end='')
         print("", file=txt_file)
 
         print("# CONTAINER I/O: <VR> <FMU_INDEX> <FMU_VR>", file=txt_file)
         for type_name in type_names_list:
             print(f"# {type_name}", file=txt_file)
-            print(len(inputs_per_type[type_name])+len(outputs_per_type[type_name])+len(locals_per_type[type_name]),
-                  file=txt_file)
+            nb = len(inputs_per_type[type_name])+len(outputs_per_type[type_name])+len(locals_per_type[type_name])
+            if profiling and type_name == "Real":
+                nb += len(self.execution_order)
+                print(nb, file=txt_file)
+                for profiling_port,_ in enumerate(self.execution_order):
+                    print(f"{profiling_port} -2 {profiling_port}", file=txt_file)
+            else:
+                print(nb, file=txt_file)
             for cport in inputs_per_type[type_name]:
                 print(f"{cport.vr} {fmu_rank[cport.fmu.name]} {cport.port.vr}", file=txt_file)
             for cport in outputs_per_type[type_name]:

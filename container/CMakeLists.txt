@@ -17,7 +17,8 @@ add_library(container SHARED
 		container.c	container.h
 		fmu.c		fmu.h
 		library.c	library.h
-		logger.c    logger.h)
+		logger.c    logger.h
+		profile.c   profile.h)
 set_target_properties(container PROPERTIES PREFIX "")
 target_include_directories(container PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/../fmi

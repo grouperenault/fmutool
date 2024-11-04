@@ -1,5 +1,7 @@
 # Use MT
 1
+# Profiling DISABLED
+0
 # Internal time step in seconds
 0.001
 # NB of embedded FMU's

@@ -64,6 +64,19 @@ static int read_mt_flag(container_t* container, config_file_t* file) {
 }
 
 
+static int read_profiling_flag(container_t* container, config_file_t* file) {
+    if (get_line(file))
+        return -1;
+    if (sscanf(file->line, "%d", &container->profiling) < 1)
+        return -2;
+
+    if (container->profiling)
+        logger(container, fmi2Warning, "Container use PROFILING");
+
+    return 0;
+}
+
+
 static int read_conf_time_step(container_t* container, config_file_t* file) {
     if (get_line(file))
         return -1;
@@ -409,6 +422,13 @@ static int read_conf(container_t* container, const char* dirname) {
         logger(container, fmi2Error, "Cannot configure MT flag.");
         return -2;
     }
+
+    if (read_profiling_flag(container, &file)) {
+        fclose(file.fp);
+        logger(container, fmi2Error, "Cannot configure PROFILING flag.");
+        return -2;
+    }
+
     if (read_conf_time_step(container, &file)) {
         fclose(file.fp);
         logger(container, fmi2Error, "Cannot set time step.");
@@ -842,30 +862,6 @@ fmi2Status fmi2GetRealOutputDerivatives(fmi2Component c,
 }
 
 
-static fmi2Status do_step_set_inputs(container_t *container, int fmu_id) {
-    const fmu_t *fmu = &container->fmu[fmu_id];
-    const fmu_io_t *fmu_io = &fmu->fmu_io;
-    fmi2Status status = fmi2OK;
-
-#define SETTER(type, fmi_type) \
-    for (fmi2ValueReference i = 0; i < fmu_io-> ## type ## .in.nb; i += 1) { \
-        const fmi2ValueReference fmu_vr = fmu_io-> ## type ## .in.translations[i].fmu_vr; \
-        const fmi2ValueReference local_vr = fmu_io-> ## type ## .in.translations[i].vr; \
-        status = fmuSet ## fmi_type (fmu, &fmu_vr, 1, &container-> ## type ## [local_vr]); \
-        if (status != fmi2OK) \
-            return status; \
-    }
-
-SETTER(reals, Real);
-SETTER(integers, Integer);
-SETTER(booleans, Boolean);
-
-#undef SETTER
- 
-    return status;
-}
-
-
 static fmi2Status do_step_get_outputs(container_t* container, int fmu_id) {
     const fmu_t* fmu = &container->fmu[fmu_id];
     const fmu_io_t* fmu_io = &fmu->fmu_io;
@@ -891,18 +887,15 @@ GETTER(booleans, Boolean);
 
 
 static fmi2Status do_internal_step_serie(container_t *container, fmi2Real currentCommunicationPoint, fmi2Real step_size,
-    fmi2Boolean   noSetFMUStatePriorToCurrentPoint) {
-    static int set_input = 0;
+    fmi2Boolean noSetFMUStatePriorToCurrentPoint) {
     fmi2Status status;
 
     for (int i = 0; i < container->nb_fmu; i += 1) {
-        const fmu_t* fmu = &container->fmu[i];
+        fmu_t* fmu = &container->fmu[i];
 
-        if (set_input) {
-            status = do_step_set_inputs(container, i);
-            if (status != fmi2OK)
-                return status;
-        }
+        status = fmu_set_inputs(fmu);
+        if (status != fmi2OK)
+            return status;
             
         /* COMPUTATION */
         status = fmuDoStep(fmu, currentCommunicationPoint, step_size, noSetFMUStatePriorToCurrentPoint);
@@ -914,7 +907,6 @@ static fmi2Status do_internal_step_serie(container_t *container, fmi2Real curren
             return status;
         
     }
-    set_input = 1;
 
     return status;
 }
@@ -922,17 +914,7 @@ static fmi2Status do_internal_step_serie(container_t *container, fmi2Real curren
 
 static fmi2Status do_internal_step_parallel_mt(container_t* container, fmi2Real currentCommunicationPoint, fmi2Real step_size,
     fmi2Boolean   noSetFMUStatePriorToCurrentPoint) {
-    static int set_input = 0;
     fmi2Status status = fmi2OK;
-
-    if (set_input) {
-        for (int i = 0; i < container->nb_fmu; i += 1) {
-            status = do_step_set_inputs(container, i);
-            if (status != fmi2OK)
-                return status;
-        }
-    } else
-        set_input = 1; /* inputs are set starting 2nd steps, start values are stored inside FMU's */
 
     container->currentCommunicationPoint = currentCommunicationPoint;
     container->step_size = step_size;
@@ -969,14 +951,11 @@ static fmi2Status do_internal_step_parallel(container_t* container, fmi2Real cur
     static int set_input = 0;
     fmi2Status status = fmi2OK;
 
-    if (set_input) {
-        for (int i = 0; i < container->nb_fmu; i += 1) {
-            status = do_step_set_inputs(container, i);
-            if (status != fmi2OK)
-                return status;
-        }
-    } else
-        set_input = 1; /* inputs are set starting 2nd steps, start values are stored inside FMU's */
+    for (int i = 0; i < container->nb_fmu; i += 1) {          
+        status = fmu_set_inputs(&container->fmu[i]);
+        if (status != fmi2OK)
+            return status;
+    }
 
     container->currentCommunicationPoint = currentCommunicationPoint;
     container->step_size = step_size;

@@ -6,6 +6,7 @@
 #   include "fmi2Functions.h"
 #   include "container.h"
 #   include "library.h"
+#   include "profile.h"
 
 
 /*----------------------------------------------------------------------------
@@ -140,6 +141,7 @@ typedef struct {
 
 typedef struct {
 	char       					*identifier;
+    int                         index;
 	library_t                   library;
 	char						resource_dir[FMU_PATH_MAX_LEN];
 	char						*guid;
@@ -156,7 +158,10 @@ typedef struct {
 	
 	fmi2Status					status;
 	int							cancel;
+    int                         set_input;
 	
+    profile_t                   *profile;
+
 	struct container_s			*container;
 } fmu_t;
 
@@ -164,9 +169,11 @@ typedef struct {
 /*----------------------------------------------------------------------------
                             P R O T O T Y P E S
 ----------------------------------------------------------------------------*/
+
+extern fmi2Status fmu_set_inputs(fmu_t *fmu);
 extern int fmu_load_from_directory(struct container_s *container, int i,
                                    const char *directory, char *identifier,
-                                    const char *guid);
+                                   const char *guid);
 extern void fmu_unload(fmu_t *fmu);
 
 extern fmi2Status fmuGetReal(const fmu_t *fmu, const fmi2ValueReference vr[],

@@ -1,3 +1,21 @@
+# FMUTool changelog
+
+## Version 1.7.3
+* ADDED: `fmucontainer` supports `-profile` option to expose RT ratio of embedded FMUs during simulation
+* ADDED: Ability to expose local variables of embedded FMUs at container level
+
+## Version 1.7.2
+* FIXED: handle `<ModelStructure>` section for `fmucontainer`
+* FIXED: brought back `-h` option to get help for `fmucontainer`
+* CHANGED: make compatibility with python >= 3.9
+
+## Version 1.7.1
+* FIXED: add missing *.xsd file that prevented checker to work
+* CHANGED: Checker use API instead of environment variable to declare custom checkers.
+
+## Version 1.7
+* ADDED: FMUContainer tool
+
 ## Version 1.6.2
 * ADDED: Ability to add your own FMU Checker.
 * ADDED: SaveNamesToCSV will dump scalar types and start values.

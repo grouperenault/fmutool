@@ -1,9 +1,37 @@
 #include "container.h"
-#include "logger.h"
 #include "fmu.h"
+#include "logger.h"
+#include "profile.h"
 
 #pragma warning(disable : 4100)     /* no complain abourt unref formal param */
 #pragma warning(disable : 4996)     /* no complain about strncpy/strncat */
+
+
+fmi2Status fmu_set_inputs(fmu_t *fmu) {
+    fmi2Status status = fmi2OK;
+
+    if (fmu->set_input) {
+        const container_t *container = fmu->container;
+        const fmu_io_t *fmu_io = &fmu->fmu_io;
+        
+#define SETTER(type, fmi_type) \
+    for (fmi2ValueReference i = 0; i < fmu_io-> ## type ## .in.nb; i += 1) { \
+        const fmi2ValueReference fmu_vr = fmu_io-> ## type ## .in.translations[i].fmu_vr; \
+        const fmi2ValueReference local_vr = fmu_io-> ## type ## .in.translations[i].vr; \
+        status = fmuSet ## fmi_type (fmu, &fmu_vr, 1, &container-> ## type ## [local_vr]); \
+        if (status != fmi2OK) \
+            return status; \
+    }
+
+        SETTER(reals, Real);
+        SETTER(integers, Integer);
+        SETTER(booleans, Boolean);
+#undef SETTER
+    } else
+        fmu->set_input = 1; /* Skip only the first doStep() */
+ 
+    return status;
+}
 
 
 static int fmu_do_step_thread(fmu_t* fmu) {
@@ -13,6 +41,12 @@ static int fmu_do_step_thread(fmu_t* fmu) {
         WaitForSingleObject(fmu->mutex_container, INFINITE);
         if (fmu->cancel)
             break;
+
+        fmu->status = fmu_set_inputs(fmu);
+        if (fmu->status != fmi2OK) {
+            SetEvent(fmu->mutex_fmu);
+            continue;
+        }
 
         fmu->status = fmuDoStep(fmu, 
                                 container->currentCommunicationPoint,
@@ -107,6 +141,7 @@ int fmu_load_from_directory(container_t *container, int i, const char *directory
     fmu_t *fmu = &container->fmu[i];
     fmu->container = container;
     fmu->identifier = identifier;
+    fmu->index = i;
     
 
     char library_filename[FMU_PATH_MAX_LEN];
@@ -127,11 +162,18 @@ int fmu_load_from_directory(container_t *container, int i, const char *directory
         return -3;
 
     fmu->cancel = 0;
+    fmu->set_input = 0;
+    if (container->profiling)
+        fmu->profile = profile_new();
+    else
+        fmu->profile = NULL;
+
     fmu->mutex_fmu = CreateEventA(NULL, FALSE, FALSE, NULL);
     fmu->mutex_container = CreateEventA(NULL, FALSE, FALSE, NULL);
     fmu->thread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)fmu_do_step_thread, fmu, 0, NULL); /* Thread should be create _after_ mutexes */
     SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
     SetThreadPriority(fmu->thread, THREAD_PRIORITY_HIGHEST);
+    SetThreadPriority(fmu->thread, THREAD_PRIORITY_TIME_CRITICAL); /* Try RT ! */
      
     return 0;
 }
@@ -152,6 +194,7 @@ void fmu_unload(fmu_t *fmu) {
 
     free(fmu->guid);
     free(fmu->identifier);
+    profile_free(fmu->profile);
 
     /* and finally unload the library */
     library_unload(fmu->library);
@@ -192,10 +235,20 @@ fmi2Status fmuDoStep(const fmu_t *fmu,
                      fmi2Real currentCommunicationPoint, 
                      fmi2Real communicationStepSize, 
                      fmi2Boolean noSetFMUStatePriorToCurrentPoint) {
-    return fmu->fmi_functions.fmi2DoStep(fmu->component, 
-                                         currentCommunicationPoint,
-                                         communicationStepSize,
-                                         noSetFMUStatePriorToCurrentPoint);
+
+    if (fmu->profile)
+        profile_tic(fmu->profile);
+
+    fmi2Status status = fmu->fmi_functions.fmi2DoStep(fmu->component, 
+                                                     currentCommunicationPoint,
+                                                     communicationStepSize,
+                                                     noSetFMUStatePriorToCurrentPoint);
+
+    if (fmu->profile) {
+        fmu->container->reals[fmu->index] = profile_toc(fmu->profile, currentCommunicationPoint+communicationStepSize);
+    }
+
+    return status;
 }
 
 
