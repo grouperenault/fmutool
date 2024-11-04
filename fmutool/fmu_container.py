@@ -10,6 +10,7 @@ from typing import *
 
 from .fmu_operations import FMU, OperationAbstract, FMUException
 from .version import __version__ as tool_version
+from .ssp import SSP
 
 logger = logging.getLogger("fmutool")
 
@@ -630,6 +631,8 @@ class FMUContainerSpecReader:
 
         if description_filename.suffix == ".csv":
             return self.read_csv(description_filename)
+        elif description_filename.suffix == ".ssp":
+            return self.read_ssp(description_filename)
         else:
             logger.critical(f"Unable to read from '{description_filename}': format unsupported.")
 
@@ -706,6 +709,13 @@ class FMUContainerSpecReader:
         headers = next(reader)
         if not headers == ["rule", "from_fmu", "from_port", "to_fmu", "to_port"]:
             raise FMUContainerError("Header (1st line of the file) is not well formatted.")
+
+    def read_ssp(self, ssp_filename: Path) -> FMUContainer:
+        logger.info(f"Building FMU Container from '{ssp_filename}'")
+        logger.warning("This feature is ALPHA stage.")
+        ssp = SSP(self.fmu_directory, ssp_filename)
+        container = FMUContainer(ssp_filename.stem, self.fmu_directory)
+        return container
 
 
 class FMUContainerSpecWriter:
