@@ -5,8 +5,8 @@ thread_t thread_new(thread_function_t function, void *data) {
 #ifdef WIN32
     HANDLE thread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)function, data, 0, NULL); /* Thread should be create _after_ mutexes */
     SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
-    SetThreadPriority(fmu->thread, THREAD_PRIORITY_HIGHEST);
-    SetThreadPriority(fmu->thread, THREAD_PRIORITY_TIME_CRITICAL); /* Try RT ! */
+    SetThreadPriority(thread, THREAD_PRIORITY_HIGHEST);
+    SetThreadPriority(thread, THREAD_PRIORITY_TIME_CRITICAL); /* Try RT ! */
 #else
     pthread_t thread;
     pthread_create(&thread, NULL, (void *(*)(void*))function, data);
