@@ -43,7 +43,7 @@ target_include_directories(container PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/../fmi
 )
 if (UNIX AND NOT APPLE)
-        target_link_libraries(client_sm rt Threads::Threads)
+        target_link_libraries(container Threads::Threads)
 endif()
 set_target_properties(container PROPERTIES
 					  RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_CURRENT_SOURCE_DIR}/../fmutool/resources/${FMI_PLATFORM}"
