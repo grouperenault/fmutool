@@ -10,6 +10,24 @@ project(container C)
 set (CMAKE_C_STANDARD 99)
 
 
+if (WIN32)
+    if ("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
+        set(FMI_PLATFORM win64)
+    else ()
+        set(FMI_PLATFORM win32)
+        endif ()
+else ()
+    set(THREADS_PREFER_PTHREAD_FLAG ON)
+    find_package(Threads REQUIRED)
+    
+    if (APPLE)
+        set(FMI_PLATFORM darwin64)
+    else ()
+        set(FMI_PLATFORM linux64)
+    endif()
+endif ()
+message("FMI_PLATFORM: ${FMI_PLATFORM}")
+
 ####################
 # Create CONTAINER #
 ####################
@@ -24,7 +42,12 @@ set_target_properties(container PROPERTIES PREFIX "")
 target_include_directories(container PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/../fmi
 )
+if (UNIX AND NOT APPLE)
+        target_link_libraries(client_sm rt Threads::Threads)
+endif()
 set_target_properties(container PROPERTIES
-					  RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_CURRENT_SOURCE_DIR}/../fmutool/resources/win64")
-#target_compile_options(container PRIVATE /W4 /WX)
+					  RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_CURRENT_SOURCE_DIR}/../fmutool/resources/${FMI_PLATFORM}"
+					  LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../fmutool/resources/${FMI_PLATFORM}")
+					  
+ #target_compile_options(container PRIVATE /W4 /WX)
 
