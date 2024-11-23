@@ -111,9 +111,6 @@ static int fmu_map_functions(fmu_t *fmu){
 }
 
 
-/** 
- * Specific: Windows
- */
 static void fs_make_path(char* buffer, size_t len, ...) {
 	va_list params;
 	va_start(params, len);
@@ -122,7 +119,11 @@ static void fs_make_path(char* buffer, size_t len, ...) {
 	while ((folder = va_arg(params, const char*))) {
 		size_t current_len = strlen(buffer);
 		if ((i > 0) && (current_len < len)) {
+#ifdef WIN32
 			buffer[current_len++] = '\\';
+#else
+            buffer[current_len++] = '/';
+#endif
 			buffer[current_len] = '\0';
 		}
 		strncat(buffer, folder, len - current_len -1);
