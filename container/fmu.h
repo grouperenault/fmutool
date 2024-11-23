@@ -1,12 +1,11 @@
 #ifndef FMU_H
 #   define FMU_H
 
-#   include <windows.h>
-
 #   include "fmi2Functions.h"
 #   include "container.h"
 #   include "library.h"
 #   include "profile.h"
+#   include "thread.h"
 
 
 /*----------------------------------------------------------------------------
@@ -137,7 +136,7 @@ typedef struct {
 /*----------------------------------------------------------------------------
                                 F M U _ T
 ----------------------------------------------------------------------------*/
-#define FMU_PATH_MAX_LEN 4096
+#   define FMU_PATH_MAX_LEN 4096
 
 typedef struct {
 	char       					*identifier;
@@ -150,9 +149,9 @@ typedef struct {
     fmi2CallbackFunctions       fmi_callback_functions;
 	fmu_interface_t				fmi_functions;
 
-	HANDLE						thread;
-	HANDLE						mutex_fmu;
-	HANDLE						mutex_container;
+	thread_t			    	thread;
+	mutex_t				    	mutex_fmu;
+	mutex_t				    	mutex_container;
 
 	fmu_io_t					fmu_io;
 	
