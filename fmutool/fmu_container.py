@@ -206,6 +206,8 @@ class FMUContainer:
             fmu = EmbeddedFMU(self.fmu_directory / fmu_filename)
             self.involved_fmu[fmu_filename] = fmu
             self.execution_order.append(fmu)
+            if not fmu.fmi_version == "2.0":
+                raise FMUException("Only FMI-2.0 is supported by FMUContainer")
             logger.debug(f"Adding FMU #{len(self.execution_order)}: {fmu}")
         except Exception as e:
             raise FMUException(f"Cannot load '{fmu_filename}': {e}")
@@ -323,10 +325,18 @@ class FMUContainer:
                             logger.info(f"AUTO INPUT: Expose {cport}")
 
     def minimum_step_size(self) -> float:
-        step_size = self.execution_order[0].step_size
+        step_size = None
         for fmu in self.execution_order:
-            if fmu.step_size < step_size:
+            if step_size:
+                if fmu.step_size and fmu.step_size < step_size:
+                    step_size = fmu.step_size
+            else:
                 step_size = fmu.step_size
+
+        if not step_size:
+            step_size = 0.1
+            logger.warning(f"Defaulting to step_size={step_size}")
+
         return step_size
 
     def sanity_check(self, step_size: Union[float, None]):
