@@ -1,3 +1,5 @@
+#include <errno.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -156,13 +158,13 @@ static int read_conf_io(container_t* container, config_file_t* file) {
 
 #define ALLOC(type, value) \
     if (container->nb_local_ ## type) { \
-        container-> ## type = malloc(container->nb_local_ ## type * sizeof(*container-> ## type)); \
-        if (!container-> ## type) \
+        container-> type = malloc(container->nb_local_ ## type * sizeof(*container-> type)); \
+        if (!container-> type) \
             return -2; \
         for(fmi2ValueReference i=0; i < container->nb_local_ ## type; i += 1) \
-            container-> ## type ## [i] = value; \
+            container-> type [i] = value; \
     } else \
-        container-> ## type = NULL 
+        container-> type = NULL 
     
     ALLOC(reals, 0.0);
     ALLOC(integers, 0);
@@ -245,24 +247,24 @@ static int read_conf_fmu_io_ ## causality ## _ ## type (fmu_io_t *fmu_io, config
     if (get_line(file)) \
         return -1; \
 \
-    fmu_io-> ## type ## . ## causality ## .translations = NULL; \
+    fmu_io-> type . causality .translations = NULL; \
 \
-    if (sscanf(file->line, "%d", &fmu_io-> ## type ## . ## causality ## .nb) < 1) \
+    if (sscanf(file->line, "%d", &fmu_io-> type . causality .nb) < 1) \
         return -2; \
 \
-    if (fmu_io-> ## type ## . ## causality ## .nb == 0) \
+    if (fmu_io-> type . causality .nb == 0) \
         return 0; \
 \
-    fmu_io-> ## type ## . ## causality ## .translations = malloc(fmu_io-> ## type ## . ## causality ## .nb * sizeof(*fmu_io-> ## type ##. ## causality ## .translations)); \
-    if (! fmu_io-> ## type ## . ## causality ## .translations) \
+    fmu_io-> type . causality .translations = malloc(fmu_io-> type . causality .nb * sizeof(*fmu_io-> type . causality .translations)); \
+    if (! fmu_io-> type . causality .translations) \
         return -3; \
 \
-    for(fmi2ValueReference i = 0; i < fmu_io-> ## type ## . ## causality ## .nb; i += 1) { \
+    for(fmi2ValueReference i = 0; i < fmu_io-> type . causality .nb; i += 1) { \
         if (get_line(file)) \
             return -4; \
 \
-        if (sscanf(file->line, "%d %d", &fmu_io-> ## type ## . ## causality ## .translations[i].vr, \
-         &fmu_io-> ## type ## . ## causality ## .translations[i].fmu_vr) < 2) \
+        if (sscanf(file->line, "%d %d", &fmu_io-> type . causality .translations[i].vr, \
+         &fmu_io-> type . causality .translations[i].fmu_vr) < 2) \
             return -5; \
     } \
 \
@@ -275,29 +277,29 @@ static int read_conf_fmu_start_values_ ## type (fmu_io_t *fmu_io, config_file_t*
     if (get_line(file)) \
         return -1; \
 \
-    fmu_io->start_ ## type ## .vr = NULL; \
-    fmu_io->start_ ## type ## .values = NULL; \
-    fmu_io->start_ ## type ## .nb = 0; \
+    fmu_io->start_ ## type .vr = NULL; \
+    fmu_io->start_ ## type .values = NULL; \
+    fmu_io->start_ ## type .nb = 0; \
 \
-    if (sscanf(file->line, "%d", &fmu_io->start_ ## type ## .nb) < 1) \
+    if (sscanf(file->line, "%d", &fmu_io->start_ ## type .nb) < 1) \
         return -2; \
 \
-    if (fmu_io->start_ ## type ## .nb == 0) \
+    if (fmu_io->start_ ## type .nb == 0) \
         return 0; \
 \
-    fmu_io->start_ ## type ## .vr = malloc(fmu_io->start_ ## type ## .nb * sizeof(*fmu_io->start_ ## type ## .vr)); \
-    if (! fmu_io->start_ ## type ## .vr) \
+    fmu_io->start_ ## type .vr = malloc(fmu_io->start_ ## type .nb * sizeof(*fmu_io->start_ ## type .vr)); \
+    if (! fmu_io->start_ ## type .vr) \
         return -3; \
-    fmu_io->start_ ## type ## .values = malloc(fmu_io->start_ ## type ## .nb * sizeof(*fmu_io->start_ ## type ## .values)); \
-    if (! fmu_io->start_ ## type ## .values) \
+    fmu_io->start_ ## type .values = malloc(fmu_io->start_ ## type .nb * sizeof(*fmu_io->start_ ## type .values)); \
+    if (! fmu_io->start_ ## type .values) \
         return -3; \
 \
-    for (fmi2ValueReference i = 0; i < fmu_io->start_ ## type ## .nb; i += 1) { \
+    for (fmi2ValueReference i = 0; i < fmu_io->start_ ## type .nb; i += 1) { \
         if (get_line(file)) \
             return -4; \
 \
-       if (sscanf(file->line, "%d " format, &fmu_io->start_ ## type ## .vr[i], \
-         &fmu_io->start_ ## type ## . values[i]) < 2) \
+       if (sscanf(file->line, "%d " format, &fmu_io->start_ ## type .vr[i], \
+         &fmu_io->start_ ## type . values[i]) < 2) \
             return -5; \
     } \
 \
@@ -673,9 +675,9 @@ fmi2Status fmi2EnterInitializationMode(fmi2Component c) {
          */
 
 #define SET_START(fmi_type, type) \
-        if (container->fmu[i].fmu_io.start_ ## type ## .nb > 0) { \
-            fmuSet ## fmi_type (&container->fmu[i], container->fmu[i].fmu_io.start_ ## type ## .vr, \
-            container->fmu[i].fmu_io.start_ ## type ## .nb, container->fmu[i].fmu_io.start_ ## type ## .values); \
+        if (container->fmu[i].fmu_io.start_ ## type .nb > 0) { \
+            fmuSet ## fmi_type (&container->fmu[i], container->fmu[i].fmu_io.start_ ## type .vr, \
+            container->fmu[i].fmu_io.start_ ## type .nb, container->fmu[i].fmu_io.start_ ## type .values); \
         }
         SET_START(Real, reals);
         SET_START(Integer, integers);
@@ -739,7 +741,7 @@ fmi2Status fmi2Get ## fmi_type (fmi2Component c, const fmi2ValueReference vr[], 
         const int fmu_id = container->vr_ ## type [vr[i]].fmu_id; \
 \
         if (fmu_id < 0) { \
-            value[i] = container-> ## type [vr[i]]; \
+            value[i] = container-> type [vr[i]]; \
         } else { \
             const fmi2ValueReference fmu_vr = container->vr_ ## type [vr[i]].fmu_vr; \
             const fmu_t *fmu = &container->fmu[fmu_id]; \
@@ -774,7 +776,7 @@ fmi2Status fmi2Set ## fmi_type (fmi2Component c, const fmi2ValueReference vr[], 
     for (size_t i = 0; i < nvr; i += 1) { \
         const int fmu_id = container->vr_ ##type [vr[i]].fmu_id; \
         if (fmu_id < 0) {\
-             container-> ## type [vr[i]] = value[i]; \
+             container-> type [vr[i]] = value[i]; \
         } else { \
             const fmu_t* fmu = &container->fmu[fmu_id]; \
             const fmi2ValueReference fmu_vr = container->vr_ ## type [vr[i]].fmu_vr; \
@@ -868,10 +870,10 @@ static fmi2Status do_step_get_outputs(container_t* container, int fmu_id) {
     fmi2Status status = fmi2OK;
 
 #define GETTER(type, fmi_type) \
-    for (fmi2ValueReference i = 0; i < fmu_io-> ## type ## .out.nb; i += 1) { \
-        const fmi2ValueReference fmu_vr = fmu_io-> ## type ## .out.translations[i].fmu_vr; \
-        const fmi2ValueReference local_vr = fmu_io-> ## type ## .out.translations[i].vr; \
-        status = fmuGet ## fmi_type (fmu, &fmu_vr, 1, &container-> ## type ## [local_vr]); \
+    for (fmi2ValueReference i = 0; i < fmu_io-> type .out.nb; i += 1) { \
+        const fmi2ValueReference fmu_vr = fmu_io-> type .out.translations[i].fmu_vr; \
+        const fmi2ValueReference local_vr = fmu_io-> type .out.translations[i].vr; \
+        status = fmuGet ## fmi_type (fmu, &fmu_vr, 1, &container-> type [local_vr]); \
         if (status != fmi2OK) \
             return status; \
     }
@@ -923,12 +925,12 @@ static fmi2Status do_internal_step_parallel_mt(container_t* container, fmi2Real 
     /* Launch computation for all threads*/
     for (int i = 0; i < container->nb_fmu; i += 1) {
         container->fmu[i].status = fmi2Error;
-        SetEvent(container->fmu[i].mutex_container);
+        thread_mutex_unlock(&container->fmu[i].mutex_container);
     }
 
     /* Consolidate results */
     for (int i = 0; i < container->nb_fmu; i += 1) {
-        WaitForSingleObject(container->fmu[i].mutex_fmu, INFINITE);
+        thread_mutex_lock(&container->fmu[i].mutex_fmu);
         if (container->fmu[i].status != fmi2OK)
             return container->fmu[i].status;
     }

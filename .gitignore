@@ -21,3 +21,4 @@ tests/containers/bouncing_ball/bouncing.fmu
 tests/containers/bouncing_ball/bouncing_auto.fmu
 tests/containers/bouncing_ball/bouncing_unlinked.fmu
 container/build-win64
+container/build

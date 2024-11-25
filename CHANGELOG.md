@@ -1,5 +1,12 @@
 # FMUTool changelog
 
+## Version 1.7.4
+* ADDED: `fmucontainer` Linux support
+* ADDED: `-fmu-directory` option defaults to "." if not set
+* FIXED: `fmucontainer` ensures that FMUs are compliant with version 2.0 of FMU Standard
+* FIXED: `fmucontainer` handles the lack of DefaultExperiment section in modelDescription.xml
+
+
 ## Version 1.7.3
 * ADDED: `fmucontainer` supports `-profile` option to expose RT ratio of embedded FMUs during simulation
 * ADDED: Ability to expose local variables of embedded FMUs at container level
