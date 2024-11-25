@@ -31,6 +31,7 @@ setup(
                               "resources/win64/container.dll",
                               "resources/linux64/client_sm.so",
                               "resources/linux64/server_sm",
+                              "resources/linux64/container.so",
                               "resources/linux32/client_sm.so",
                               "resources/linux32/server_sm",
                               "resources/license.txt",

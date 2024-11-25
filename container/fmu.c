@@ -1,3 +1,6 @@
+#include <stdarg.h>
+#include <string.h>
+
 #include "container.h"
 #include "fmu.h"
 #include "logger.h"
@@ -15,10 +18,10 @@ fmi2Status fmu_set_inputs(fmu_t *fmu) {
         const fmu_io_t *fmu_io = &fmu->fmu_io;
         
 #define SETTER(type, fmi_type) \
-    for (fmi2ValueReference i = 0; i < fmu_io-> ## type ## .in.nb; i += 1) { \
-        const fmi2ValueReference fmu_vr = fmu_io-> ## type ## .in.translations[i].fmu_vr; \
-        const fmi2ValueReference local_vr = fmu_io-> ## type ## .in.translations[i].vr; \
-        status = fmuSet ## fmi_type (fmu, &fmu_vr, 1, &container-> ## type ## [local_vr]); \
+    for (fmi2ValueReference i = 0; i < fmu_io-> type .in.nb; i += 1) { \
+        const fmi2ValueReference fmu_vr = fmu_io-> type .in.translations[i].fmu_vr; \
+        const fmi2ValueReference local_vr = fmu_io-> type .in.translations[i].vr; \
+        status = fmuSet ## fmi_type (fmu, &fmu_vr, 1, &container-> type [local_vr]); \
         if (status != fmi2OK) \
             return status; \
     }
@@ -38,13 +41,13 @@ static int fmu_do_step_thread(fmu_t* fmu) {
     const container_t* container =fmu->container;
 
     while (!fmu->cancel) {
-        WaitForSingleObject(fmu->mutex_container, INFINITE);
+        thread_mutex_lock(&fmu->mutex_container);
         if (fmu->cancel)
             break;
 
         fmu->status = fmu_set_inputs(fmu);
         if (fmu->status != fmi2OK) {
-            SetEvent(fmu->mutex_fmu);
+            thread_mutex_unlock(&fmu->mutex_fmu);
             continue;
         }
 
@@ -53,10 +56,10 @@ static int fmu_do_step_thread(fmu_t* fmu) {
                                 container->step_size,
                                 container->noSetFMUStatePriorToCurrentPoint);
 
-        SetEvent(fmu->mutex_fmu);
+        thread_mutex_unlock(&fmu->mutex_fmu);
     }
 
-    SetEvent(fmu->mutex_fmu);
+    thread_mutex_unlock(&fmu->mutex_fmu);
     return 0;
 }
 
@@ -108,9 +111,6 @@ static int fmu_map_functions(fmu_t *fmu){
 }
 
 
-/** 
- * Specific: Windows
- */
 static void fs_make_path(char* buffer, size_t len, ...) {
 	va_list params;
 	va_start(params, len);
@@ -119,7 +119,11 @@ static void fs_make_path(char* buffer, size_t len, ...) {
 	while ((folder = va_arg(params, const char*))) {
 		size_t current_len = strlen(buffer);
 		if ((i > 0) && (current_len < len)) {
+#ifdef WIN32
 			buffer[current_len++] = '\\';
+#else
+            buffer[current_len++] = '/';
+#endif
 			buffer[current_len] = '\0';
 		}
 		strncat(buffer, folder, len - current_len -1);
@@ -133,7 +137,7 @@ static void fs_make_path(char* buffer, size_t len, ...) {
 
 
 /** 
- * Specific: FMI2.0 and Windows
+ * Specific: FMI2.0
  */
 int fmu_load_from_directory(container_t *container, int i, const char *directory, char *identifier, const char *guid) {
     if (! container)
@@ -168,13 +172,10 @@ int fmu_load_from_directory(container_t *container, int i, const char *directory
     else
         fmu->profile = NULL;
 
-    fmu->mutex_fmu = CreateEventA(NULL, FALSE, FALSE, NULL);
-    fmu->mutex_container = CreateEventA(NULL, FALSE, FALSE, NULL);
-    fmu->thread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)fmu_do_step_thread, fmu, 0, NULL); /* Thread should be create _after_ mutexes */
-    SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
-    SetThreadPriority(fmu->thread, THREAD_PRIORITY_HIGHEST);
-    SetThreadPriority(fmu->thread, THREAD_PRIORITY_TIME_CRITICAL); /* Try RT ! */
-     
+    fmu->mutex_fmu = thread_mutex_new();
+    fmu->mutex_container = thread_mutex_new();
+    fmu->thread = thread_new((thread_function_t)fmu_do_step_thread, fmu);
+
     return 0;
 }
 
@@ -183,14 +184,22 @@ void fmu_unload(fmu_t *fmu) {
 
     /* Stop the thread */
     fmu->cancel = 1;
-    SetEvent(fmu->mutex_container);
-    WaitForSingleObject(fmu->mutex_fmu, INFINITE);
+    thread_mutex_unlock(&fmu->mutex_container);
+    thread_mutex_lock(&fmu->mutex_fmu);
+#ifdef WIN32
     WaitForSingleObject(fmu->thread, INFINITE);
+#else
+    pthread_join(fmu->thread, NULL);
+#endif
+
 
     /* Free resources linked to threading */
+#ifdef WIN32
     CloseHandle(fmu->thread);
-    CloseHandle(fmu->mutex_fmu);
-    CloseHandle(fmu->mutex_container);
+#endif
+
+    thread_mutex_free(&fmu->mutex_fmu);
+    thread_mutex_free(&fmu->mutex_container);
 
     free(fmu->guid);
     free(fmu->identifier);
@@ -286,7 +295,7 @@ fmi2Status fmuInstantiate(fmu_t *fmu,
                           fmi2Boolean loggingOn) {
 
     fmu->fmi_callback_functions.componentEnvironment = fmu;
-    fmu->fmi_callback_functions.logger = logger_embedded_fmu;
+    fmu->fmi_callback_functions.logger = (fmi2CallbackLogger)logger_embedded_fmu;
     fmu->fmi_callback_functions.allocateMemory = fmu->container->callback_functions->allocateMemory;
     fmu->fmi_callback_functions.freeMemory = fmu->container->callback_functions->freeMemory;
     fmu->fmi_callback_functions.stepFinished = NULL;
