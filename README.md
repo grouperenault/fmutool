@@ -28,6 +28,13 @@ FMU Manipulation Toolbox is released with a GUI. You can launch it with the foll
 
 ## Command Line Interface
 
+FMU Manipulation Toolbox comes with 2 commands:
+- `fmutool`: a versatile analysis and manipulation tool for FMU.
+- `fmucontainer`: group FMU's inside FMU Containers. (see [container/README.md](container/README.md))
+
+
+### Analysis and Manipulation tool:
+
 You can use `fmutool -help` to get usage:
 
 ```
@@ -112,6 +119,26 @@ optional arguments:
                                     later issues when using the FMU. (default: None)
 ```
 
+### FMU Containers
+
+```
+fmucontainer [-h] -fmu-directory FMU_DIRECTORY [-container filename.csv:step_size] [-debug] [-no-auto-input]
+             [-no-auto-output] [-no-auto-link] [-mt] [-profile]
+
+Generate FMU from FMU's
+
+optional arguments:
+  -h, -help
+  -fmu-directory FMU_DIRECTORY      Directory containing initial FMU’s and used to generate containers. (default: None)
+  -container filename.csv:step_size
+                                    Description of the container to create. (default: [])
+  -debug                            Add lot of useful log during the process. (default: False)
+  -no-auto-input                    Create ONLY explicit input. (default: True)
+  -no-auto-output                   Create ONLY explicit output. (default: True)
+  -no-auto-link                     Create ONLY explicit links. (default: True)
+  -mt                               Enable Multi-Threaded mode for the generated container. (default: False)
+  -profile                          Enable Profiling mode for the generated container. (default: False)
+```
 
 ## API
 

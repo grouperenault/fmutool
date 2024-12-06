@@ -208,7 +208,7 @@ class FilterWidget(QPushButton):
             return sorted(self.items_selected)
 
 
-class FmutoolMainWindow(QWidget):
+class FMUManipulationToolboxlMainWindow(QWidget):
     def __init__(self, app, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -478,7 +478,7 @@ QMenu::indicator:unchecked:disabled {width: 35px; image: url(images:checkbox-unc
 """
 
         self.app.setStyleSheet(css_dark)
-        self.window = FmutoolMainWindow(self.app)
+        self.window = FMUManipulationToolboxlMainWindow(self.app)
         print(self.__doc__)
         print(f"                                                                Version {version}")
         sys.exit(self.app.exec())

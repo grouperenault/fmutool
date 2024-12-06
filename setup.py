@@ -45,13 +45,13 @@ setup(
     url="https://github.com/grouperenault/fmutool/",
     description="FMU Manipulation Toobox is a python application which help to modify a Functional Mock-up Units (FMUs) "
                 "without recompilation or to group them into FMU Containers",
-    long_description="""FMU Manipulation Toobox is a python application which help to modify a Functional Mock-up Units (FMUs) 
+    long_description="""FMU Manipulation Toolbox is a python application which help to modify a Functional Mock-up Units (FMUs) 
 without recompilation. It mainly modifies the `modelDescription.xml` file. It is highly customizable.
 
 Manipulating the `modelDescription.xml` can be a dangerous thing! Communicating with the FMU-developer and adapting
 the way the FMU is generated, is the preferable when possible.
 
-FMUTool also allows to group FMU's inside FMU Containers.
+FMU Manipulation Toolbox also allows to group FMU's inside FMU Containers.
     """,
     install_requires=[
         "PyQt5 >= 5.15.10",
