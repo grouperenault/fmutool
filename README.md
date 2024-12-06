@@ -1,18 +1,18 @@
-# FMUTool
+# FMU Manipulation Toolbox
 
-FMUTool is a python application which help to modify a [Functional Mock-up Units (FMUs)](http://fmi-standard.org/)
-without recompilation. It mainly modifies the `modelDescription.xml` file. It is highly customizable.
+FMU Manipulation Toolbox is a python package which help to analyse and modify a [Functional Mock-up Units (FMUs)](http://fmi-standard.org/)
+without recompilation. It is highly customizable. It can even modify the `modelDescription.xml` file.
 
 Manipulating the `modelDescription.xml` can be a dangerous thing! Communicating with the FMU-developer and adapting
 the way the FMU is generated, is preferable when possible.
 
-FMUTool also allows to group FMU's inside FMU Containers. (see [container/README.md](container/README.md))
+FMU Manipulation Toolbox also allows to group FMU's inside FMU Containers. (see [container/README.md](container/README.md))
 
 ## Installation
 
-Two options available to install FMUTool:
+Two options available to install FMU Manipulation Toolbox:
 
-- (Easiest option) Install with from PyPI: `python -m pip install fmutool`
+- (Easiest option) Install with from PyPI: `python -m pip install fmu_manipulation`
 - Compile and install from [github repository](https://github.com/grouperenault/fmutool). You will need 
   - Python required packages. See `requirements.txt`.
   - C compiler
@@ -20,7 +20,8 @@ Two options available to install FMUTool:
     
 ## Graphical User Interface
 
-FMUTool is released with a GUI. You can launch it with the following command `fmutool` (without any option)
+FMU Manipulation Toolbox is released with a GUI. You can launch it with the following command `fmutool`
+(without any option)
 
 ![GUI](doc/fmutool.png "GUI")
 
@@ -118,7 +119,8 @@ You can write your own FMU Manipulation scripts. Once you downloaded fmutool mod
 adding the `import` statement lets you access the API :
 
 ```python
-from fmutool.fmu_operations import FMU, OperationExtractNames, OperationStripTopLevel, OperationRenameFromCSV
+from fmu_manipulation_toolbox.fmu_operations import FMU, OperationExtractNames, OperationStripTopLevel,
+  OperationRenameFromCSV
 ```
 
 ### remove toplevel bus (if any)

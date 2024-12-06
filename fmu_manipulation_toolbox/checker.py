@@ -1,7 +1,6 @@
 import importlib.util
 import inspect
 import os
-import glob
 import xmlschema
 from xmlschema.validators.exceptions import XMLSchemaValidationError
 from .fmu_operations import OperationAbstract

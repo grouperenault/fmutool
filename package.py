@@ -6,7 +6,7 @@ version = sys.argv[1]
 
 # create a ZipFile object
 base_directory = "build"
-zip_filename = f"fmutool-{version}.zip"
+zip_filename = f"fmu_manipulation_toolbox-{version}.zip"
 
 with ZipFile(zip_filename, 'w') as zip_file:
     for folder_name, subfolders, filenames in os.walk(base_directory):

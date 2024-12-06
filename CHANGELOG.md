@@ -1,4 +1,9 @@
-# FMUTool changelog
+# FMU Manipulation Toolbox changelog
+This package was formerly know as `fmutool`.
+
+
+## Version 1.8
+* CHANGE: Package in now known as `fmu_manipulation`
 
 ## Version 1.7.4
 * ADDED: `fmucontainer` Linux support

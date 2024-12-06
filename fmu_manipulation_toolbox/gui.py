@@ -142,8 +142,14 @@ class LogWidget(QTextBrowser):
         self.setFont(font)
         self.setMinimumWidth(800)
         self.setMinimumHeight(480)
+
+        self.insertHtml(f'<img src="fmutool.png"/>')
         LogWidget.XStream.stdout().messageWritten.connect(self.insertPlainText)
         LogWidget.XStream.stderr().messageWritten.connect(self.insertPlainText)
+
+    def loadResource(self, type, name):
+        image_path = os.path.join(os.path.dirname(__file__), "resources", name.toString())
+        return QPixmap(image_path)
 
 
 class HelpWidget(QLabel):
@@ -206,8 +212,8 @@ class FmutoolMainWindow(QWidget):
     def __init__(self, app, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.setWindowTitle('FMUTool - manipulate your FMU''s')
-        self.setWindowIcon(QIcon(os.path.join(os.path.dirname(__file__), 'resources', 'fmutool.png')))
+        self.setWindowTitle('FMU Manipulation Toolbox')
+        self.setWindowIcon(QIcon(os.path.join(os.path.dirname(__file__), 'resources', 'fmu_manipulation_toolbox.png')))
 
         # set the grid layout
         self.layout = QGridLayout()

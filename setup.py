@@ -1,7 +1,7 @@
 from setuptools import setup
 import os
 import re
-from fmutool.version import __author__ as author, __version__ as default_version
+from fmu_manipulation_toolbox.version import __author__ as author, __version__ as default_version
 
 try:
     version = os.environ["GITHUB_REF_NAME"]
@@ -15,16 +15,16 @@ if not re.match(r"[A-Za-z]?\d+(\.\d)+", version):
 
 # Create __version__.py
 try:
-    with open("fmutool/__version__.py", "wt") as file:
+    with open("fmu_manipulation_toolbox/__version__.py", "wt") as file:
         print(f"'{version}'", file=file)
 except Exception as e:
     print(f"Cannot create __version__.py: {e}")
 
 setup(
-    name="fmutool",
+    name="fmu_manipulation_toolbox",
     version=version,
-    packages=["fmutool"],
-    package_data={"fmutool": ["resources/win32/client_sm.dll",
+    packages=["fmu_manipulation_toolbox"],
+    package_data={"fmu_manipulation_toolbox": ["resources/win32/client_sm.dll",
                               "resources/win32/server_sm.exe",
                               "resources/win64/client_sm.dll",
                               "resources/win64/server_sm.exe",
@@ -39,13 +39,13 @@ setup(
                               "resources/fmi-2.0/*.xsd",
                               ],
                   },
-    entry_points={"console_scripts": ["fmutool = fmutool.cli:fmutool",
-                                      "fmucontainer = fmutool.cli:fmucontainer"]},
+    entry_points={"console_scripts": ["fmu_manipulation_toolbox = fmu_manipulation_toolbox.cli:fmu_manipulation_toolbox",
+                                      "fmucontainer = fmu_manipulation_toolbox.cli:fmucontainer"]},
     author=author,
     url="https://github.com/grouperenault/fmutool/",
-    description="FMUTool is a python application which help to modify a Functional Mock-up Units (FMUs) "
+    description="FMU Manipulation Toobox is a python application which help to modify a Functional Mock-up Units (FMUs) "
                 "without recompilation or to group them into FMU Containers",
-    long_description="""FMUTool is a python application which help to modify a Functional Mock-up Units (FMUs) 
+    long_description="""FMU Manipulation Toobox is a python application which help to modify a Functional Mock-up Units (FMUs) 
 without recompilation. It mainly modifies the `modelDescription.xml` file. It is highly customizable.
 
 Manipulating the `modelDescription.xml` can be a dangerous thing! Communicating with the FMU-developer and adapting
@@ -61,4 +61,4 @@ FMUTool also allows to group FMU's inside FMU Containers.
     ],
 )
 
-os.remove("fmutool/__version__.py")
+os.remove("fmu_manipulation_toolbox/__version__.py")
