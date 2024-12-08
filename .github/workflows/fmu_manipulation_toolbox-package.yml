@@ -1,6 +1,6 @@
 # This starter workflow is for a CMake project running on multiple platforms. There is a different starter workflow if you just want a single platform.
 # See: https://github.com/actions/starter-workflows/blob/main/ci/cmake-single-platform.yml
-name: Release FMUTOOL
+name: Release FMUManipulationToolbox
 
 on:
   push:
@@ -39,7 +39,7 @@ jobs:
         uses: actions/upload-artifact@master
         with:
           name: remoting-win32
-          path: ${{ github.workspace }}/fmutool/resources/win32/
+          path: ${{ github.workspace }}/fmu_manipulation_toolbox/resources/win32/
           retention-days: 1
   remoting-windows64:
     runs-on: windows-latest
@@ -71,7 +71,7 @@ jobs:
         uses: actions/upload-artifact@master
         with:
           name: remoting-win64
-          path: ${{ github.workspace }}/fmutool/resources/win64
+          path: ${{ github.workspace }}/fmu_manipulation_toolbox/resources/win64
           retention-days: 1
   remoting-linux32:
     runs-on: ubuntu-latest
@@ -107,7 +107,7 @@ jobs:
         uses: actions/upload-artifact@master
         with:
           name: remoting-linux32
-          path: ${{ github.workspace }}/fmutool/resources/linux32
+          path: ${{ github.workspace }}/fmu_manipulation_toolbox/resources/linux32
           retention-days: 1
   remoting-linux64:
     runs-on: ubuntu-latest
@@ -138,7 +138,7 @@ jobs:
         uses: actions/upload-artifact@master
         with:
           name: remoting-linux64
-          path: ${{ github.workspace }}/fmutool/resources/linux64
+          path: ${{ github.workspace }}/fmu_manipulation_toolbox/resources/linux64
           retention-days: 1
   container-windows64:
     runs-on: windows-latest
@@ -170,7 +170,7 @@ jobs:
         uses: actions/upload-artifact@master
         with:
           name: container-win64
-          path: ${{ github.workspace }}/fmutool/resources/win64
+          path: ${{ github.workspace }}/fmu_manipulation_toolbox/resources/win64
           retention-days: 1
   container-linux64:
     runs-on: ubuntu-latest
@@ -201,7 +201,7 @@ jobs:
         uses: actions/upload-artifact@master
         with:
           name: container-linux64
-          path: ${{ github.workspace }}/fmutool/resources/linux64
+          path: ${{ github.workspace }}/fmu_manipulation_toolbox/resources/linux64
           retention-days: 1
   package:
     needs: [remoting-windows32, remoting-windows64, remoting-linux32, remoting-linux64, container-windows64, container-linux64]
@@ -211,27 +211,27 @@ jobs:
     - uses: actions/download-artifact@master
       with:
         name: remoting-win64
-        path: ${{ github.workspace }}/fmutool/resources/win64/
+        path: ${{ github.workspace }}/fmu_manipulation_toolbox/resources/win64/
     - uses: actions/download-artifact@master
       with:
         name: remoting-win32
-        path: ${{ github.workspace }}/fmutool/resources/win32/
+        path: ${{ github.workspace }}/fmu_manipulation_toolbox/resources/win32/
     - uses: actions/download-artifact@master
       with:
         name: remoting-linux32
-        path: ${{ github.workspace }}/fmutool/resources/linux32/
+        path: ${{ github.workspace }}/fmu_manipulation_toolbox/resources/linux32/
     - uses: actions/download-artifact@master
       with:
         name: remoting-linux64
-        path: ${{ github.workspace }}/fmutool/resources/linux64/
+        path: ${{ github.workspace }}/fmu_manipulation_toolbox/resources/linux64/
     - uses: actions/download-artifact@master
       with:
         name: container-win64
-        path: ${{ github.workspace }}/fmutool/resources/win64/
+        path: ${{ github.workspace }}/fmu_manipulation_toolbox/resources/win64/
     - uses: actions/download-artifact@master
       with:
         name: container-linux64
-        path: ${{ github.workspace }}/fmutool/resources/linux64/
+        path: ${{ github.workspace }}/fmu_manipulation_toolbox/resources/linux64/
     - name: Set up Python 3.10
       uses: actions/setup-python@v3
       with:

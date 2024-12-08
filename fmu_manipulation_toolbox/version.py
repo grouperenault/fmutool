@@ -1,5 +1,5 @@
 try:
-    from fmutool.__version__ import __doc__ as __version__
+    from fmu_manipulation_toolbox.__version__ import __doc__ as __version__
 except ModuleNotFoundError:
     __version__ = "0.0-dev"
 

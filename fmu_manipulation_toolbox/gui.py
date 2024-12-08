@@ -142,8 +142,14 @@ class LogWidget(QTextBrowser):
         self.setFont(font)
         self.setMinimumWidth(800)
         self.setMinimumHeight(480)
+
+        self.insertHtml('<center><img src="fmu_manipulation_toolbox.png"/></center><br>')
         LogWidget.XStream.stdout().messageWritten.connect(self.insertPlainText)
         LogWidget.XStream.stderr().messageWritten.connect(self.insertPlainText)
+
+    def loadResource(self, type, name):
+        image_path = os.path.join(os.path.dirname(__file__), "resources", name.toString())
+        return QPixmap(image_path)
 
 
 class HelpWidget(QLabel):
@@ -202,12 +208,12 @@ class FilterWidget(QPushButton):
             return sorted(self.items_selected)
 
 
-class FmutoolMainWindow(QWidget):
+class FMUManipulationToolboxlMainWindow(QWidget):
     def __init__(self, app, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.setWindowTitle('FMUTool - manipulate your FMU''s')
-        self.setWindowIcon(QIcon(os.path.join(os.path.dirname(__file__), 'resources', 'fmutool.png')))
+        self.setWindowTitle('FMU Manipulation Toolbox')
+        self.setWindowIcon(QIcon(os.path.join(os.path.dirname(__file__), 'resources', 'icon.png')))
 
         # set the grid layout
         self.layout = QGridLayout()
@@ -429,11 +435,13 @@ class FmutoolMainWindow(QWidget):
 
 
 class Application:
-    r"""                                  ____   __  ___  __  __ ______             __
-                    \-^-/        / __/  /  |/  / / / / //_  __/ ___  ___   / /
-                    (o o)       / _/   / /|_/ / / /_/ /  / /   / _ \/ _ \ / /
-                ooO--(_)--Ooo- /_/    /_/  /_/  \____/  /_/    \___/\___//_/"""
+    """
+Analyse and modify your FMUs.
 
+Note: modifying the modelDescription.xml can damage your FMU ! Communicating with the FMU-developer and adapting the
+way the FMU is generated, is preferable when possible.
+
+    """
     def __init__(self):
         QDir.addSearchPath('images', os.path.join(os.path.dirname(__file__), "resources"))
         self.app = QApplication(sys.argv)
@@ -472,9 +480,9 @@ QMenu::indicator:unchecked:disabled {width: 35px; image: url(images:checkbox-unc
 """
 
         self.app.setStyleSheet(css_dark)
-        self.window = FmutoolMainWindow(self.app)
+        self.window = FMUManipulationToolboxlMainWindow(self.app)
+        print(" "*80, f"Version {version}")
         print(self.__doc__)
-        print(f"                                                                Version {version}")
         sys.exit(self.app.exec())
 
     def exit(self):

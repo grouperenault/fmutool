@@ -1,19 +1,19 @@
-## FMUTool validation plan
+## FMU Manipulation Toolbox validation plan
 
 Flowchart of a typical usage of FMUTool:
 ```mermaid
 flowchart LR
     fmu_in["Input FMU"]
-    fmutool[["FMUTool"]]
+    fmumanipulationtoolbox[["FMU Manipulation Toolbox"]]
     fmu_out["Output FMU"]
-    fmu_in --> fmutool
-    fmutool --> fmu_out
+    fmu_in --> fmumanipulationtoolbox
+    fmumanipulationtoolbox --> fmu_out
 ```
 
 Test suite is implemented in [tests directory](../tests).
 
 ### FMU Import Compatibility information
-FMUtool import supports FMI 2.0 and Co-Simulation interface.
+FMU Manipulation Toolbox import supports FMI 2.0 and Co-Simulation interface.
 
 #### Tested Exporting Tool
 - Amesim 
@@ -24,7 +24,7 @@ Automated testsuite use [bouncing_ball.fmu](../tests/bouncing_ball.fmu).
 
 
 ### FMU Export Compatibility information
-FMUTool export supports FMI 2.0 and implement Co-Simulation interface.
+FMU Manipulation Toolbox export supports FMI 2.0 and implements Co-Simulation interface.
 
 #### Validation Tools
 - fmpy

@@ -442,7 +442,7 @@ fmi2Status fmi2GetReal(fmi2Component c, const fmi2ValueReference vr[], size_t nv
     portable_size_t portable_nvr = (portable_size_t)nvr;
 
     if (nvr * sizeof(fmi2Real) > REMOTE_ARG_SIZE) {
-        LOG_ERROR(client, "fmi2GetReal message is to big. Contact fmutool maintainer.");
+        LOG_ERROR(client, "fmi2GetReal message is to big.");
         return fmi2Error;
     }
 
@@ -468,7 +468,7 @@ fmi2Status fmi2GetInteger(fmi2Component c, const fmi2ValueReference vr[], size_t
     portable_size_t portable_nvr = (portable_size_t)nvr;
 
     if (nvr * sizeof(fmi2Integer) >= REMOTE_ARG_SIZE) {
-        LOG_ERROR(client, "fmi2GetInteger message is to big. Contact fmutool maintainer.");
+        LOG_ERROR(client, "fmi2GetInteger message is to big.");
         return fmi2Error;
     }
 
@@ -488,7 +488,7 @@ fmi2Status fmi2GetBoolean(fmi2Component c, const fmi2ValueReference vr[], size_t
     portable_size_t portable_nvr = (portable_size_t)nvr;
 
     if (nvr * sizeof(fmi2Boolean) >= REMOTE_ARG_SIZE) {
-        LOG_ERROR(client, "fmi2GetBoolean message is to big. Contact fmutool maintainer.");
+        LOG_ERROR(client, "fmi2GetBoolean message is to big.");
         return fmi2Error;
     }
 
@@ -523,7 +523,7 @@ fmi2Status fmi2SetReal(fmi2Component c, const fmi2ValueReference vr[], size_t nv
     portable_size_t portable_nvr = (portable_size_t)nvr;
 
     if (nvr * sizeof(fmi2Real) >= REMOTE_ARG_SIZE) {
-        LOG_ERROR(client, "fmi2SetReal message is to big. Contact fmutool maintainer.");
+        LOG_ERROR(client, "fmi2SetReal message is to big.");
         return fmi2Error;
     }
 
@@ -546,7 +546,7 @@ fmi2Status fmi2SetInteger(fmi2Component c, const fmi2ValueReference vr[], size_t
     portable_size_t portable_nvr = (portable_size_t)nvr;
 
     if (nvr * sizeof(fmi2Integer) >= REMOTE_ARG_SIZE) {
-        LOG_ERROR(client, "fmi2SetInteger message is to big. Contact fmutool maintainer.");
+        LOG_ERROR(client, "fmi2SetInteger message is to big.");
         return fmi2Error;
     }
 
@@ -563,7 +563,7 @@ fmi2Status fmi2SetBoolean(fmi2Component c, const fmi2ValueReference vr[], size_t
     portable_size_t portable_nvr = (portable_size_t)nvr;
 
     if (nvr * sizeof(fmi2Boolean) >= REMOTE_ARG_SIZE) {
-        LOG_ERROR(client, "fmi2SetBoolean message is to big. Contact fmutool maintainer.");
+        LOG_ERROR(client, "fmi2SetBoolean message is to big.");
         return fmi2Error;
     }
 

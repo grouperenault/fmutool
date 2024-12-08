@@ -2,7 +2,7 @@ FMPy Remoting Binaries License
 ==============================
 
 The 32-bit remoting binaries (binaries/win64/<model_name>.dll and
-binaries/win64/server.exe) are part of FMUTOOL
+binaries/win64/server.exe) are part of FMU Manipulation Toolbox
 and released under the 2-Clause BSD license:
 
 Copyright 2023 Renault SAS
