@@ -1,4 +1,4 @@
-# FMU Manipulation Toolbox
+![Title](fmu_manipulation_toolbox/resources/fmu_manipulation_toolbox.png)
 
 FMU Manipulation Toolbox is a python package which help to analyse and modify a [Functional Mock-up Units (FMUs)](http://fmi-standard.org/)
 without recompilation. It is highly customizable. It can even modify the `modelDescription.xml` file.
@@ -23,7 +23,7 @@ Two options available to install FMU Manipulation Toolbox:
 FMU Manipulation Toolbox is released with a GUI. You can launch it with the following command `fmutool`
 (without any option)
 
-![GUI](doc/fmutool.png "GUI")
+![GUI](doc/gui.png "GUI")
 
 
 ## Command Line Interface
