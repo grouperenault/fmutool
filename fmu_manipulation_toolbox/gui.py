@@ -213,7 +213,7 @@ class FMUManipulationToolboxlMainWindow(QWidget):
         super().__init__(*args, **kwargs)
 
         self.setWindowTitle('FMU Manipulation Toolbox')
-        self.setWindowIcon(QIcon(os.path.join(os.path.dirname(__file__), 'resources', 'fmu_manipulation_toolbox.png')))
+        self.setWindowIcon(QIcon(os.path.join(os.path.dirname(__file__), 'resources', 'icon.png')))
 
         # set the grid layout
         self.layout = QGridLayout()
