@@ -53,7 +53,7 @@ def fmutool():
                                      description="Analyse and Manipulate a FMU by modifying its 'modelDescription.xml'",
                                      formatter_class=make_wide(argparse.HelpFormatter),
                                      add_help=False,
-                                     epilog="see: https://github.com/grouperenault/fmutool/blob/main/README.md")
+                                     epilog="see: https://github.com/grouperenault/fmu_manipulation_toolbox/blob/main/README.md")
 
     def add_option(option, *args, **kwargs):
         parser.add_argument(option, *args, help=help_message.usage(option), **kwargs)
@@ -153,7 +153,7 @@ def fmucontainer():
     parser = argparse.ArgumentParser(prog="fmucontainer", description="Generate FMU from FMU's",
                                      formatter_class=make_wide(argparse.ArgumentDefaultsHelpFormatter),
                                      add_help=False,
-                                     epilog="see: https://github.com/grouperenault/fmutool/blob/main/"
+                                     epilog="see: https://github.com/grouperenault/fmu_manipulation_toolbox/blob/main/"
                                             "container/README.md")
 
     parser.add_argument('-h', '-help', action="help")

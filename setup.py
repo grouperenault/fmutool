@@ -43,7 +43,7 @@ setup(
                                       "fmucontainer = fmu_manipulation_toolbox.cli:fmucontainer"],
                   },
     author=author,
-    url="https://github.com/grouperenault/fmutool/",
+    url="https://github.com/grouperenault/fmu_manipulation_toolbox/",
     description="FMU Manipulation Toobox is a python application which help to modify a Functional Mock-up Units (FMUs) "
                 "without recompilation or to group them into FMU Containers",
     long_description="""FMU Manipulation Toolbox is a python application which help to modify a Functional Mock-up Units (FMUs) 

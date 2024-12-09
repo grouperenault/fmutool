@@ -13,7 +13,7 @@ FMU Manipulation Toolbox also allows to group FMU's inside FMU Containers. (see 
 Two options available to install FMU Manipulation Toolbox:
 
 - (Easiest option) Install with from PyPI: `python -m pip install fmu_manipulation`
-- Compile and install from [github repository](https://github.com/grouperenault/fmutool). You will need 
+- Compile and install from [github repository](https://github.com/grouperenault/fmu_manipulation_toolbox). You will need 
   - Python required packages. See `requirements.txt`.
   - C compiler
 

@@ -153,7 +153,7 @@ class LogWidget(QTextBrowser):
 
 
 class HelpWidget(QLabel):
-    HELP_URL = "https://github.com/grouperenault/fmutool/blob/main/README.md"
+    HELP_URL = "https://github.com/grouperenault/fmu_manipulation_toolbox/blob/main/README.md"
 
     def __init__(self):
         super().__init__()

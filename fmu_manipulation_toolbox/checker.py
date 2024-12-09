@@ -17,7 +17,7 @@ class OperationGenericCheck(OperationAbstract):
 
     def fmi_attrs(self, attrs):
         if attrs['fmiVersion'] not in self.SUPPORTED_FMI_VERSIONS:
-            print(f"ERROR: fmutool only support FMI {','.join(self.SUPPORTED_FMI_VERSIONS)} versions.")
+            print(f"ERROR: Expected FMI {','.join(self.SUPPORTED_FMI_VERSIONS)} versions.")
             return
 
         xsd_filename = os.path.join(os.path.dirname(__file__), "resources", "fmi-" + attrs['fmiVersion'],
