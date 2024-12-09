@@ -39,8 +39,9 @@ setup(
                               "resources/fmi-2.0/*.xsd",
                               ],
                   },
-    entry_points={"console_scripts": ["fmutool = fmu_manipulation_toolbox.cli:fmutool",
-                                      "fmucontainer = fmu_manipulation_toolbox.cli:fmucontainer"]},
+    entry_points={"console_scripts": ["fmutool = fmu_manipulation_toolbox.__main__:main",
+                                      "fmucontainer = fmu_manipulation_toolbox.cli:fmucontainer"],
+                  },
     author=author,
     url="https://github.com/grouperenault/fmutool/",
     description="FMU Manipulation Toobox is a python application which help to modify a Functional Mock-up Units (FMUs) "
