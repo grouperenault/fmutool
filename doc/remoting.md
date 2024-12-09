@@ -2,7 +2,7 @@
 
 ## What is it ?
 
-The remoting feature lets you to add an additional interface to an existing FMU.
+The remoting feature lets you to implement an additional interface to an existing FMU.
 There is 3 use cases:
 1. Add a different bitness interface. For example, add a Windows 64bits interface to a existing 32bits only FMU.
 2. Encapsulate the DLL of an existing FMU inside a dedicated process. This process will communicate with the simulation 

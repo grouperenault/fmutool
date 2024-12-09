@@ -11,7 +11,7 @@ from typing import *
 from .fmu_operations import FMU, OperationAbstract, FMUException
 from .version import __version__ as tool_version
 
-logger = logging.getLogger("fmutool")
+logger = logging.getLogger("fmu_manipulation_toolbox")
 
 
 class FMUPort:
