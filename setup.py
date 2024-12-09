@@ -43,7 +43,9 @@ setup(
                                       "fmucontainer = fmutool.cli:fmucontainer"]},
     author=author,
     url="https://github.com/grouperenault/fmutool/",
-    description="FMUTool is a python application which help to modify a Functional Mock-up Units (FMUs) "
+    description="IMPORTANT: this package was renamed 'fmu_manipulation_toolbox'. It won't be updated anymore. "
+                "Please use those new package."
+                "FMUTool is a python application which help to modify a Functional Mock-up Units (FMUs) "
                 "without recompilation or to group them into FMU Containers",
     long_description="""FMUTool is a python application which help to modify a Functional Mock-up Units (FMUs) 
 without recompilation. It mainly modifies the `modelDescription.xml` file. It is highly customizable.
@@ -58,6 +60,7 @@ FMUTool also allows to group FMU's inside FMU Containers.
         "xmlschema >= 3.3.1",
         "elementpath >= 4.4.0",
         "colorama >= 0.4.6",
+        "fmu-manipulation-toolbox == 1.7.5",
     ],
 )
 
