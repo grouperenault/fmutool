@@ -39,7 +39,7 @@ setup(
                               "resources/fmi-2.0/*.xsd",
                               ],
                   },
-    entry_points={"console_scripts": ["fmu_manipulation_toolbox = fmu_manipulation_toolbox.cli:fmu_manipulation_toolbox",
+    entry_points={"console_scripts": ["fmutool = fmu_manipulation_toolbox.cli:fmutool",
                                       "fmucontainer = fmu_manipulation_toolbox.cli:fmucontainer"]},
     author=author,
     url="https://github.com/grouperenault/fmutool/",
