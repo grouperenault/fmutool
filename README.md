@@ -1,31 +1,39 @@
-# FMUTool
+![Title](fmu_manipulation_toolbox/resources/fmu_manipulation_toolbox.png)
 
-FMUTool is a python application which help to modify a [Functional Mock-up Units (FMUs)](http://fmi-standard.org/)
-without recompilation. It mainly modifies the `modelDescription.xml` file. It is highly customizable.
+FMU Manipulation Toolbox is a python package which help to analyse and modify a [Functional Mock-up Units (FMUs)](http://fmi-standard.org/)
+without recompilation. It is highly customizable. It can even modify the `modelDescription.xml` file.
 
 Manipulating the `modelDescription.xml` can be a dangerous thing! Communicating with the FMU-developer and adapting
 the way the FMU is generated, is preferable when possible.
 
-FMUTool also allows to group FMU's inside FMU Containers. (see [container/README.md](container/README.md))
+FMU Manipulation Toolbox also allows to group FMU's inside FMU Containers. (see [container/README.md](container/README.md))
 
 ## Installation
 
-Two options available to install FMUTool:
+Two options available to install FMU Manipulation Toolbox:
 
-- (Easiest option) Install with from PyPI: `python -m pip install fmutool`
-- Compile and install from [github repository](https://github.com/grouperenault/fmutool). You will need 
+- (Easiest option) Install with from PyPI: `python -m pip install fmu_manipulation`
+- Compile and install from [github repository](https://github.com/grouperenault/fmu_manipulation_toolbox). You will need 
   - Python required packages. See `requirements.txt`.
   - C compiler
 
     
 ## Graphical User Interface
 
-FMUTool is released with a GUI. You can launch it with the following command `fmutool` (without any option)
+FMU Manipulation Toolbox is released with a GUI. You can launch it with the following command `fmutool`
+(without any option)
 
-![GUI](doc/fmutool.png "GUI")
+![GUI](doc/gui.png "GUI")
 
 
 ## Command Line Interface
+
+FMU Manipulation Toolbox comes with 2 commands:
+- `fmutool`: a versatile analysis and manipulation tool for FMU.
+- `fmucontainer`: group FMU's inside FMU Containers. (see [container/README.md](container/README.md))
+
+
+### Analysis and Manipulation tool:
 
 You can use `fmutool -help` to get usage:
 
@@ -111,6 +119,26 @@ optional arguments:
                                     later issues when using the FMU. (default: None)
 ```
 
+### FMU Containers
+
+```
+fmucontainer [-h] -fmu-directory FMU_DIRECTORY [-container filename.csv:step_size] [-debug] [-no-auto-input]
+             [-no-auto-output] [-no-auto-link] [-mt] [-profile]
+
+Generate FMU from FMU's
+
+optional arguments:
+  -h, -help
+  -fmu-directory FMU_DIRECTORY      Directory containing initial FMU’s and used to generate containers. (default: None)
+  -container filename.csv:step_size
+                                    Description of the container to create. (default: [])
+  -debug                            Add lot of useful log during the process. (default: False)
+  -no-auto-input                    Create ONLY explicit input. (default: True)
+  -no-auto-output                   Create ONLY explicit output. (default: True)
+  -no-auto-link                     Create ONLY explicit links. (default: True)
+  -mt                               Enable Multi-Threaded mode for the generated container. (default: False)
+  -profile                          Enable Profiling mode for the generated container. (default: False)
+```
 
 ## API
 
@@ -118,7 +146,8 @@ You can write your own FMU Manipulation scripts. Once you downloaded fmutool mod
 adding the `import` statement lets you access the API :
 
 ```python
-from fmutool.fmu_operations import FMU, OperationExtractNames, OperationStripTopLevel, OperationRenameFromCSV
+from fmu_manipulation_toolbox.fmu_operations import FMU, OperationExtractNames, OperationStripTopLevel,
+  OperationRenameFromCSV
 ```
 
 ### remove toplevel bus (if any)

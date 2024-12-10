@@ -12,7 +12,7 @@ from .fmu_operations import FMU, OperationAbstract, FMUException
 from .version import __version__ as tool_version
 from .ssp import SSP
 
-logger = logging.getLogger("fmutool")
+logger = logging.getLogger("fmu_manipulation_toolbox")
 
 
 class FMUPort:
