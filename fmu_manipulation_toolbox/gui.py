@@ -480,13 +480,20 @@ QMenu::indicator:unchecked:disabled {width: 35px; image: url(images:checkbox-unc
 """
 
         self.setStyleSheet(css_dark)
+
         self.setWindowIcon(QIcon(os.path.join(os.path.dirname(__file__), 'resources', 'icon.png')))
+        if os.name == 'nt':
+            # https://stackoverflow.com/questions/1551605/how-to-set-applications-taskbar-icon-in-windows-7/1552105#1552105
+            import ctypes
+            application_id = 'FMU_Manipulation_Toolbox'  # arbitrary string
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(application_id)
 
         self.window = FMUManipulationToolboxlMainWindow()
 
 
 def main():
     application = Application(sys.argv)
+
     print(" " * 80, f"Version {version}")
     print(application.__doc__)
 
