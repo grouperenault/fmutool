@@ -8,6 +8,7 @@ from PyQt5.QtGui import QPixmap, QImage, QFont, QTextCursor, QIcon, QColor, QPai
 import textwrap
 from functools import partial
 from typing import Optional
+import ctypes
 
 from .fmu_operations import *
 from .checker import checker_list
@@ -214,6 +215,11 @@ class FMUManipulationToolboxlMainWindow(QWidget):
 
         self.setWindowTitle('FMU Manipulation Toolbox')
         self.setWindowIcon(QIcon(os.path.join(os.path.dirname(__file__), 'resources', 'icon.png')))
+
+        if os.name == 'nt':
+            # https://stackoverflow.com/questions/1551605/how-to-set-applications-taskbar-icon-in-windows-7/1552105#1552105
+            application_id = 'FMU_Manipulation_Toolbox'  # arbitrary string
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(application_id)
 
         # set the grid layout
         self.layout = QGridLayout()
