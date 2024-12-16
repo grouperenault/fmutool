@@ -59,9 +59,12 @@ class FMUManipulationToolboxTestSuite(unittest.TestCase):
 
     def test_container(self):
         assembly = AssemblyCSV(Path("bouncing.csv"), fmu_directory="containers/bouncing_ball", mt=True)
+        assembly.write_json("bouncing.json")
         assembly.make_fmu(debug=True)
         self.assert_identical_files("containers/bouncing_ball/REF_container.txt",
                                     "containers/bouncing_ball/bouncing/resources/container.txt")
+        self.assert_identical_files("containers/bouncing_ball/REF_bouncing.json",
+                                    "containers/bouncing_ball/bouncing.json")
 
 
 if __name__ == '__main__':
