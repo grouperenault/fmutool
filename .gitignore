@@ -23,3 +23,6 @@ tests/containers/bouncing_ball/bouncing_unlinked.fmu
 container/build-win64
 container/build
 tests/bouncing_ball.csv
+fmu_manipulation_toolbox/resources/darwin64/client_sm.dylib
+fmu_manipulation_toolbox/resources/darwin64/container.dylib
+fmu_manipulation_toolbox/resources/darwin64/server_sm
