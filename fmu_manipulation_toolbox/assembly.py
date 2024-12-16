@@ -154,7 +154,21 @@ class Assembly:
             for port in self.root.drop_ports:
                 print(f"DROP;{port.fmu_name};{port.port_name};;", file=outfile)
 
-    def json_encode_node(self, node: AssemblyNode, prefix, root_stmt: List[str] = []) ->  str:
+    def json_encode_node(self, node: AssemblyNode) -> Dict[str, Any]:
+        json_node = dict()
+        json_node["name"] = node.name
+        json_node["mt"] = node.mt
+        json_node["profiling"] = node.profiling
+        json_node["auto_link"] = node.auto_link
+        if node.step_size:
+            json_node["step_size"] = node.step_size
+
+        if node.children:
+            json_node["container"] = [ self.json_encode_node(child) for child in node.children]
+
+        return json_node
+
+    def json_encode_node_old(self, node: AssemblyNode, prefix, root_stmt: List[str] = []) ->  str:
         node_stmt = root_stmt
 
         node_str = prefix + '{\n'
@@ -226,11 +240,12 @@ class Assembly:
         return node_str
 
     def write_json(self, description_filename: Union[str, Path]):
-        with open(self.fmu_directory / description_filename, "wt") as outfile:
+        with open(self.fmu_directory / description_filename, "wt") as file:
             root_stmt = [f'  "auto_input": {"true" if self.auto_input else "false"}',
                          f'  "auto_output": {"true" if self.auto_input else "false"}']
-            outfile.write(self.json_encode_node(self.root, "", root_stmt=root_stmt))
-            outfile.write("\n")
+
+            data = self.json_encode_node(self.root)
+            json.dump(data, file, indent=2)
 
     def make_fmu(self, debug=False):
         self.write_json("toto.json")
