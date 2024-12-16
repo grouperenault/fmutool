@@ -4,6 +4,7 @@ import sys
 from colorama import Fore, Style, init
 
 from .fmu_operations import *
+from .fmu_container import FMUContainerError
 from .assembly import AssemblyCSV, AssemblyJson, AssemblySSP
 from .checker import checker_list
 from .version import __version__ as version
@@ -211,10 +212,13 @@ def fmucontainer():
                 return
         except FileNotFoundError as e:
             logger.fatal(f"Cannot read file: {e}")
-            return
+            continue
 
-        assembly.make_fmu(debug=config.debug)
-
+        try:
+            assembly.make_fmu(debug=config.debug)
+        except FMUContainerError as e:
+            logger.fatal(f"{filename}: {e}")
+            continue
 
 # for debug purpose
 if __name__ == "__main__":

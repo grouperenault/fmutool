@@ -1,4 +1,3 @@
-import csv
 import logging
 import os
 import shutil
@@ -8,7 +7,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import *
 
-from .fmu_operations import FMU, OperationAbstract, FMUException
+from .fmu_operations import FMU, OperationAbstract
 from .version import __version__ as tool_version
 
 
@@ -207,10 +206,10 @@ class FMUContainer:
             self.involved_fmu[fmu_filename] = fmu
             self.execution_order.append(fmu)
             if not fmu.fmi_version == "2.0":
-                raise FMUException("Only FMI-2.0 is supported by FMUContainer")
+                raise FMUContainerError("Only FMI-2.0 is supported by FMUContainer")
             logger.debug(f"Adding FMU #{len(self.execution_order)}: {fmu}")
         except Exception as e:
-            raise FMUException(f"Cannot load '{fmu_filename}': {e}")
+            raise FMUContainerError(f"Cannot load '{fmu_filename}': {e}")
 
         return fmu
 
@@ -227,7 +226,7 @@ class FMUContainer:
             container_port_name = to_port_name
         cport_to = ContainerPort(self.get_fmu(to_fmu_filename), to_port_name)
         if not cport_to.port.causality == "input":  # check causality
-            raise FMUException(f"{cport_to} is {cport_to.port.causality} instead of INPUT.")
+            raise FMUContainerError(f"{cport_to} is {cport_to.port.causality} instead of INPUT.")
 
         logger.debug(f"INPUT: {to_fmu_filename}:{to_port_name}")
         self.mark_ruled(cport_to, 'INPUT')
@@ -239,7 +238,7 @@ class FMUContainer:
 
         cport_from = ContainerPort(self.get_fmu(from_fmu_filename), from_port_name)
         if cport_from.port.causality not in ("output", "local"):  # check causality
-            raise FMUException(f"{cport_from} is {cport_from.port.causality} instead of OUTPUT or LOCAL")
+            raise FMUContainerError(f"{cport_from} is {cport_from.port.causality} instead of OUTPUT or LOCAL")
 
         logger.debug(f"OUTPUT: {from_fmu_filename}:{from_port_name}")
         self.mark_ruled(cport_from, 'OUTPUT')
@@ -248,7 +247,7 @@ class FMUContainer:
     def drop_port(self, from_fmu_filename: str, from_port_name: str):
         cport_from = ContainerPort(self.get_fmu(from_fmu_filename), from_port_name)
         if not cport_from.port.causality == "output":  # check causality
-            raise FMUException(f"{cport_from}: trying to DROP {cport_from.port.causality}")
+            raise FMUContainerError(f"{cport_from}: trying to DROP {cport_from.port.causality}")
 
         logger.debug(f"DROP: {from_fmu_filename}:{from_port_name}")
         self.mark_ruled(cport_from, 'DROP')
