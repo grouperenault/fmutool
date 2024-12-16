@@ -5,6 +5,7 @@ import os
 sys.path.insert(0, os.path.relpath(os.path.join(os.path.dirname(__file__), "..")))
 from fmu_manipulation_toolbox.fmu_operations import *
 from fmu_manipulation_toolbox.fmu_container import *
+from fmu_manipulation_toolbox.assembly import *
 
 
 class FMUManipulationToolboxTestSuite(unittest.TestCase):
@@ -41,6 +42,7 @@ class FMUManipulationToolboxTestSuite(unittest.TestCase):
         self.assert_operation_match_ref("bouncing_ball-renamed.fmu",
                                         OperationRenameFromCSV("bouncing_ball-modified.csv"))
 
+    @unittest.skipUnless(sys.platform.startswith("win"), "Supported only on Windows")
     def test_add_remoting_win32(self):
         fmu = FMU(self.fmu_filename)
         operation = OperationAddRemotingWin32()
