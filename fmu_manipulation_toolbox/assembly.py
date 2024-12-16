@@ -194,7 +194,7 @@ class Assembly:
 
     def make_fmu(self, debug=False):
         self.root.generate_fmu(self.fmu_directory, auto_input=self.auto_input, auto_output=self.auto_output,
-                               debug=debug, description_pathname=self.description_pathname)
+                               debug=debug, description_pathname=self.fmu_directory / self.description_pathname)
 
 
 class AssemblyCSV(Assembly):
