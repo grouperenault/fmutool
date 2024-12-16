@@ -6,7 +6,7 @@ from typing import *
 from pathlib import Path
 import uuid
 
-from .fmu_container import FMUContainer
+from .fmu_container import FMUContainer, FMUContainerError
 from .ssp import SSP
 
 logger = logging.getLogger("fmu_manipulation_toolbox")
@@ -37,7 +37,6 @@ class AssemblyNode:
         self.mt = mt
         self.profiling = profiling
         self.auto_link = auto_link
-
         self.children: List[AssemblyNode] = []
 
         self.fmu_names_list: List[str] = []
@@ -47,13 +46,12 @@ class AssemblyNode:
         self.drop_ports: List[Port] = []
         self.links: List[Connection] = []
 
-    def add_container(self, name: Union[None, str] = None, mt = False, profiling = False, auto_link = True):
-        if name is None:
-            name = str(uuid.uuid4())
+    def add_sub_node(self, sub_node):
+        if sub_node.name is None:
+            sub_node.name = str(uuid.uuid4())+".fmu"
 
-        node = AssemblyNode(name, mt=mt, profiling=profiling, auto_link=auto_link)
-        self.fmu_names_list.append(node.name)
-        self.children.append(node)
+        self.fmu_names_list.append(sub_node.name)
+        self.children.append(sub_node)
 
     def add_fmu(self, fmu_name: str):
         self.fmu_names_list.append(fmu_name)
@@ -74,7 +72,7 @@ class AssemblyNode:
     def add_start_value(self, fmu_filename: str, port_name: str, value: str):
         self.start_values[Port(fmu_filename, port_name)] = value
 
-    def generate_fmu(self, fmu_directory: Path, auto_input=False, auto_output=False, debug=False,
+    def generate_fmu(self, fmu_directory: Path, auto_input=True, auto_output=True, debug=False,
                      description_pathname=None):
         for node in self.children:
             node.generate_fmu(fmu_directory, debug=debug)
@@ -156,18 +154,23 @@ class Assembly:
             for port in self.root.drop_ports:
                 print(f"DROP;{port.fmu_name};{port.port_name};;", file=outfile)
 
-    @staticmethod
-    def json_node_str(node: AssemblyNode, prefix, root_stmt: List[str] = []) ->  str:
+    def json_encode_node(self, node: AssemblyNode, prefix, root_stmt: List[str] = []) ->  str:
         node_stmt = root_stmt
 
         node_str = prefix + '{\n'
+        node_stmt.append(prefix + f'  "name": "{node.name}"')
         node_stmt.append(prefix + f'  "mt": {"true" if node.mt else "false"}')
         node_stmt.append(prefix + f'  "profiling": {"true" if node.profiling else "false"}')
         node_stmt.append(prefix + f'  "auto_link": {"true" if node.auto_link else "false"}')
+        if node.step_size:
+            node_stmt.append(prefix + f'  "step_size": {node.step_size}')
 
         if node.children:
-            node_str += prefix + '  "container": [\n'
-            node_str += prefix + '  ]\n'
+            string = prefix + '  "container": [\n'
+            containers = [ f'{prefix}{self.json_encode_node(child, prefix+"    ")}' for child in node.children]
+            string += ',\n'.join(containers)
+            string += f'\n{prefix}  ]'
+            node_stmt.append(string)
 
         if node.fmu_names_list:
             string = prefix + '  "fmu": [\n'
@@ -218,26 +221,26 @@ class Assembly:
 
 
         node_str += ",\n".join(node_stmt)
-        node_str += f"{prefix}\n}}"
+        node_str += f"\n{prefix}}}"
 
         return node_str
 
     def write_json(self, description_filename: Union[str, Path]):
         with open(self.fmu_directory / description_filename, "wt") as outfile:
-            root_stmt = []
-            root_stmt.append(f'  "auto_input": {"true" if self.auto_input else "false"}')
-            root_stmt.append(f'  "auto_output": {"true" if self.auto_input else "false"}')
-            outfile.write(self.json_node_str(self.root, "", root_stmt=root_stmt))
+            root_stmt = [f'  "auto_input": {"true" if self.auto_input else "false"}',
+                         f'  "auto_output": {"true" if self.auto_input else "false"}']
+            outfile.write(self.json_encode_node(self.root, "", root_stmt=root_stmt))
             outfile.write("\n")
 
     def make_fmu(self, debug=False):
+        self.write_json("toto.json")
         self.root.generate_fmu(self.fmu_directory, auto_input=self.auto_input, auto_output=self.auto_output,
                                debug=debug, description_pathname=self.fmu_directory / self.description_pathname)
 
 
 class AssemblyCSV(Assembly):
-    def __init__(self, csv_filename: str, step_size = None, auto_link: bool = True,  auto_input: bool = True, auto_output: bool = True,
-                 mt: bool = False, profiling: bool = False, fmu_directory: str = "."):
+    def __init__(self, csv_filename: str, step_size = None, auto_link: bool = True,  auto_input: bool = True,
+                 auto_output: bool = True, mt: bool = False, profiling: bool = False, fmu_directory: str = "."):
 
         name = str(Path(csv_filename).with_suffix(".fmu"))
         root = AssemblyNode(name, step_size=step_size, auto_link=auto_link, mt=mt, profiling=profiling)
@@ -316,8 +319,49 @@ class AssemblyCSV(Assembly):
 
 
 class AssemblyJson(Assembly):
-    pass
+    def __init__(self, filename: str, fmu_directory: str = "."):
 
+        with open(filename) as file:
+            try:
+                data = json.load(file)
+            except json.decoder.JSONDecodeError as e:
+                raise FMUContainerError(f"Cannot read json: {e}")
+        root = self.json_decode_node(data)
+        root.name = str(Path(filename).with_suffix(".fmu"))
+        auto_input = data.get("auto_input", True)
+        auto_output = data.get("auto_output", True)
+        super().__init__(filename, root, auto_input=auto_input, auto_output=auto_output, fmu_directory=fmu_directory)
+
+    def json_decode_node(self, data) -> AssemblyNode:
+        name = data.get("name", None)
+        step_size = data.get("step_size", None)
+        auto_link = data.get("auto_link", True)
+        mt = data.get("mt", False)
+        profiling = data.get("profiling", False)
+
+        node = AssemblyNode(name, step_size=step_size, auto_link=auto_link, mt=mt, profiling=profiling)
+
+        if "container" in data:
+            for sub_data in data["container"]:
+                node.add_sub_node(self.json_decode_node(sub_data))
+
+        if "fmu" in data:
+            for fmu in data["fmu"]:
+                node.add_fmu(fmu)
+
+        if "input" in data:
+            for line in data["input"]:
+                node.add_input(line[1], line[2], line[0])
+
+        if "output" in data:
+            for line in data["output"]:
+                node.add_output(line[0], line[1], line[2])
+
+        if "start" in data:
+            for line in data["output"]:
+                node.add_start_value(line[0], line[1], line[2])
+
+        return node
 
 class AssemblySSP(Assembly):
     def __init__(self, ssp_filename: str, auto_link: bool = True, auto_input: bool = True, auto_output: bool = True,

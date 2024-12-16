@@ -200,18 +200,21 @@ def fmucontainer():
 
         try:
             if filename.endswith(".json"):
-                assembly = AssemblyJson()
+                assembly = AssemblyJson(filename, fmu_directory=config.fmu_directory)
             elif filename.endswith(".ssp"):
                 assembly = AssemblySSP()
             elif filename.endswith(".csv"):
                 assembly = AssemblyCSV(filename, step_size=step_size, auto_link=config.auto_link,
                                        auto_input=config.auto_input, auto_output=config.auto_output, mt=config.mt,
-                                       profiling=config.profiling)
+                                       profiling=config.profiling, fmu_directory=config.fmu_directory)
             else:
                 logger.fatal(f"Not supported file format '{description}")
                 return
         except FileNotFoundError as e:
             logger.fatal(f"Cannot read file: {e}")
+            continue
+        except FMUContainerError as e:
+            logger.fatal(f"{filename}: {e}")
             continue
 
         try:
