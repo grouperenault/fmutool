@@ -1,6 +1,9 @@
 {
+  "auto_input": true,
+  "auto_output": true,
   "mt": true,
   "profiling": false,
+  "auto_link": true,
   "fmu": [
     "bb_position.fmu",
     "bb_velocity.fmu"

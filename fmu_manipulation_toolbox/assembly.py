@@ -157,12 +157,13 @@ class Assembly:
                 print(f"DROP;{port.fmu_name};{port.port_name};;", file=outfile)
 
     @staticmethod
-    def json_node_str(node: AssemblyNode, prefix) ->  str:
-        node_str_list = []
+    def json_node_str(node: AssemblyNode, prefix, root_stmt: List[str] = []) ->  str:
+        node_stmt = root_stmt
 
         node_str = prefix + '{\n'
-        node_str_list.append(prefix + f'  "mt": {"true" if node.mt else "false"}')
-        node_str_list.append(prefix + f'  "profiling": {"true" if node.profiling else "false"}')
+        node_stmt.append(prefix + f'  "mt": {"true" if node.mt else "false"}')
+        node_stmt.append(prefix + f'  "profiling": {"true" if node.profiling else "false"}')
+        node_stmt.append(prefix + f'  "auto_link": {"true" if node.auto_link else "false"}')
 
         if node.children:
             node_str += prefix + '  "container": [\n'
@@ -173,7 +174,7 @@ class Assembly:
             fmu_names = [ f'{prefix}    "{fmu_name}"' for fmu_name in node.fmu_names_list]
             string += ',\n'.join(fmu_names)
             string += f'\n{prefix}  ]'
-            node_str_list.append(string)
+            node_stmt.append(string)
 
         if node.input_ports:
             string = prefix + '  "input": [\n'
@@ -181,7 +182,7 @@ class Assembly:
                            for port, source in node.input_ports.items()]
             string += ',\n'.join(input_port)
             string += f'\n{prefix}  ]'
-            node_str_list.append(string)
+            node_stmt.append(string)
 
         if node.output_ports:
             string = prefix + '  "output": [\n'
@@ -189,7 +190,7 @@ class Assembly:
                             for port, target in node.output_ports.items()]
             string += ',\n'.join(output_port)
             string += f'\n{prefix}  ]'
-            node_str_list.append(string)
+            node_stmt.append(string)
 
         if node.links:
             string = prefix + '  "link": [\n'
@@ -197,7 +198,7 @@ class Assembly:
                             for link in node.links]
             string += ',\n'.join(links)
             string += f'\n{prefix}  ]'
-            node_str_list.append(string)
+            node_stmt.append(string)
 
         if node.start_values:
             string = prefix + '  "start": [\n'
@@ -205,7 +206,7 @@ class Assembly:
                            for port, start in node.start_values.items()]
             string += ',\n'.join(starts)
             string += f'\n{prefix}  ]'
-            node_str_list.append(string)
+            node_stmt.append(string)
 
         if node.drop_ports:
             string = prefix + '  "drop": [\n'
@@ -213,17 +214,20 @@ class Assembly:
                            for port in node.drop_ports]
             string += ',\n'.join(drops)
             string += f'\n{prefix}  ]'
-            node_str_list.append(string)
+            node_stmt.append(string)
 
 
-        node_str += ",\n".join(node_str_list)
+        node_str += ",\n".join(node_stmt)
         node_str += f"{prefix}\n}}"
 
         return node_str
 
     def write_json(self, description_filename: Union[str, Path]):
         with open(self.fmu_directory / description_filename, "wt") as outfile:
-            outfile.write(self.json_node_str(self.root, ""))
+            root_stmt = []
+            root_stmt.append(f'  "auto_input": {"true" if self.auto_input else "false"}')
+            root_stmt.append(f'  "auto_output": {"true" if self.auto_input else "false"}')
+            outfile.write(self.json_node_str(self.root, "", root_stmt=root_stmt))
             outfile.write("\n")
 
     def make_fmu(self, debug=False):
