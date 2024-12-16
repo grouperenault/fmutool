@@ -7,6 +7,7 @@ from pathlib import Path
 import uuid
 
 from .fmu_container import FMUContainer
+from .ssp import SSP
 
 logger = logging.getLogger("fmu_manipulation_toolbox")
 
@@ -73,12 +74,12 @@ class AssemblyNode:
     def add_start_value(self, fmu_filename: str, port_name: str, value: str):
         self.start_values[Port(fmu_filename, port_name)] = value
 
-    def generate_fmu(self, fmu_directory: Path, auto_input=False, auto_output=False, debug=False):
+    def generate_fmu(self, fmu_directory: Path, auto_input=False, auto_output=False, debug=False,
+                     description_pathname=None):
         for node in self.children:
             node.generate_fmu(fmu_directory, debug=debug)
 
-        container = FMUContainer(self.name, fmu_directory)
-        logger.info(f"Building FMU Container from '{container.description_pathname}'")
+        container = FMUContainer(self.name, fmu_directory, description_pathname=description_pathname)
 
         for fmu_name in self.fmu_names_list:
             container.get_fmu(fmu_name)
@@ -120,11 +121,20 @@ class AssemblyError(Exception):
 
 
 class Assembly:
-    def __init__(self, root: AssemblyNode, auto_input = True, auto_output = True, fmu_directory: str= "."):
+    def __init__(self, description_pathname, root: AssemblyNode, auto_input = True, auto_output = True, fmu_directory: str= "."):
+        self.description_pathname = description_pathname
         self.root = root
         self.auto_input = auto_input
         self.auto_output = auto_output
         self.fmu_directory = Path(fmu_directory)
+
+    def write(self, description_filename: Union[str, Path]):
+        if description_filename.endswith(".csv"):
+            return self.write_csv(description_filename)
+        elif description_filename.endswith(".json"):
+            return self.write_json(description_filename)
+        else:
+            logger.critical(f"Unable to write to '{description_filename}': format unsupported.")
 
     def write_csv(self, description_filename: Union[str, Path]):
         if self.root.children:
@@ -146,27 +156,57 @@ class Assembly:
             for port in self.root.drop_ports:
                 print(f"DROP;{port.fmu_name};{port.port_name};;", file=outfile)
 
+    def write_json(self, description_filename: Union[str, Path]):
+        with open(description_filename, "wt") as outfile:
+            print("{", file=outfile)
+
+            print(f'  "fmu":    [', file=outfile)
+            fmus = [f'              "{fmu}"' for fmu in self.container.involved_fmu.keys()]
+            print(",\n".join(fmus), file=outfile)
+            print(f'            ],', file=outfile)
+
+            print(f'  "input":  [', file=outfile)
+            inputs = [f'              [{cport.fmu.name}, {cport.port.name}, {container_name}]'
+                      for container_name, cport in self.container.inputs.items()]
+            print(",\n".join(inputs), file=outfile)
+            print(f'            ],', file=outfile)
+
+            print(f'  "output": [', file=outfile)
+            outputs = [f'              ["{cport.fmu.name}", "{cport.port.name}", "{container_name}"]'
+                       for container_name, cport in self.container.outputs.items()]
+            print(",\n".join(outputs), file=outfile)
+            print(f'            ],', file=outfile)
+
+            print(f'  "link":   [', file=outfile)
+            links = [f'              ["{local.cport_from.fmu.name}", "{local.cport_from.port.name}", '
+                     f'"{target.fmu.name}", "{target.port.name}"]'
+                     for local in self.container.locals.values()
+                     for target in local.cport_to_list]
+            print(",\n".join(links), file=outfile)
+            print(f'            ],', file=outfile)
+            print(f'  "start":  [', file=outfile)
+            start = [f'              ["{cport.fmu.name}", "{cport.port.name}, "{value}"]'
+                     for cport, value in self.container.start_values.items()]
+            print(f'            ],', file=outfile)
+
+            #print(f'  "period": {self.container.})
+            print("}", file=outfile)
+
     def make_fmu(self, debug=False):
         self.root.generate_fmu(self.fmu_directory, auto_input=self.auto_input, auto_output=self.auto_output,
-                               debug=debug)
+                               debug=debug, description_pathname=self.description_pathname)
 
 
 class AssemblyCSV(Assembly):
-    def __init__(self, csv_filename: str, auto_link: bool = True,  auto_input: bool = True, auto_output: bool = True,
+    def __init__(self, csv_filename: str, step_size = None, auto_link: bool = True,  auto_input: bool = True, auto_output: bool = True,
                  mt: bool = False, profiling: bool = False, fmu_directory: str = "."):
 
-        try:
-            filename, step_size = str(csv_filename).split(":")
-            step_size = float(step_size)
-        except ValueError:
-            step_size = None
-            filename = csv_filename
-
-        name = str(Path(filename).with_suffix(".fmu"))
+        name = str(Path(csv_filename).with_suffix(".fmu"))
         root = AssemblyNode(name, step_size=step_size, auto_link=auto_link, mt=mt, profiling=profiling)
-        super().__init__(root, auto_input=auto_input, auto_output=auto_output, fmu_directory=fmu_directory)
+        super().__init__(csv_filename, root, auto_input=auto_input, auto_output=auto_output,
+                         fmu_directory=fmu_directory)
 
-        logger.info(f"Building FMU Container from '{csv_filename}'")
+        logger.info(f"Reading '{csv_filename}'")
 
         with open(Path(fmu_directory) / csv_filename) as file:
             reader = csv.reader(file, delimiter=';')
@@ -238,4 +278,9 @@ class AssemblyJson(Assembly):
 
 
 class AssemblySSP(Assembly):
-    pass
+    def __init__(self, ssp_filename: str, auto_link: bool = True, auto_input: bool = True, auto_output: bool = True,
+                 mt: bool = False, profiling: bool = False, fmu_directory: str = "."):
+        logger.info(f"Building FMU Container from '{ssp_filename}'")
+        logger.warning("This feature is ALPHA stage.")
+        ssp = SSP(self.fmu_directory, ssp_filename)
+        container = FMUContainer(ssp_filename.stem, self.fmu_directory)

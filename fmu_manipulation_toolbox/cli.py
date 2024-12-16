@@ -4,7 +4,7 @@ import sys
 from colorama import Fore, Style, init
 
 from .fmu_operations import *
-from .fmu_container import FMUContainerSpecReader, FMUContainerError
+from .assembly import AssemblyCSV, AssemblyJson, AssemblySSP
 from .checker import checker_list
 from .version import __version__ as version
 from .help import Help
@@ -163,7 +163,7 @@ def fmucontainer():
                              "If not defined, current directory is used.")
 
     parser.add_argument("-container", action="append", dest="container_descriptions_list", default=[],
-                        metavar="filename.csv:step_size",
+                        metavar="filename.{csv|json|ssp},[:step_size]", required=True,
                         help="Description of the container to create.")
 
     parser.add_argument("-debug", action="store_true", dest="debug",
@@ -191,25 +191,29 @@ def fmucontainer():
 
     for description in config.container_descriptions_list:
         try:
-            filename_description, step_size = description.split(":")
+            filename, step_size = description.split(":")
             step_size = float(step_size)
         except ValueError:
             step_size = None
-            filename_description = description
-
-        container_filename = Path(filename_description).with_suffix(".fmu")
+            filename = description
 
         try:
-            csv_reader = FMUContainerSpecReader(Path(config.fmu_directory))
-            container = csv_reader.read(filename_description)
-            container.add_implicit_rule(auto_input=config.auto_input,
-                                        auto_output=config.auto_output,
-                                        auto_link=config.auto_link)
-            container.make_fmu(container_filename, step_size=step_size, debug=config.debug, mt=config.mt,
-                               profiling=config.profiling)
-        except (FileNotFoundError, FMUContainerError, FMUException) as e:
-            logger.error(f"Cannot build container from '{filename_description}': {e}")
-            continue
+            if filename.endswith(".json"):
+                assembly = AssemblyJson()
+            elif filename.endswith(".ssp"):
+                assembly = AssemblySSP()
+            elif filename.endswith(".csv"):
+                assembly = AssemblyCSV(filename, step_size=step_size, auto_link=config.auto_link,
+                                       auto_input=config.auto_input, auto_output=config.auto_output, mt=config.mt,
+                                       profiling=config.profiling)
+            else:
+                logger.fatal(f"Not supported file format '{description}")
+                return
+        except FileNotFoundError as e:
+            logger.fatal(f"Cannot read file: {e}")
+            return
+
+        assembly.make_fmu(debug=config.debug)
 
 
 # for debug purpose
