@@ -190,6 +190,13 @@ def fmucontainer():
     if config.debug:
         logger.setLevel(logging.DEBUG)
 
+    fmu_directory = Path(config.fmu_directory)
+    if not fmu_directory.is_dir():
+        logger.fatal(f"FMU directory is not valid: '{fmu_directory}'")
+        return
+
+    logger.info(f"FMU directory: '{fmu_directory}'")
+
     for description in config.container_descriptions_list:
         try:
             filename, step_size = description.split(":")
@@ -200,13 +207,13 @@ def fmucontainer():
 
         try:
             if filename.endswith(".json"):
-                assembly = AssemblyJson(filename, fmu_directory=config.fmu_directory)
+                assembly = AssemblyJson(filename, fmu_directory=fmu_directory)
             elif filename.endswith(".ssp"):
                 assembly = AssemblySSP()
             elif filename.endswith(".csv"):
                 assembly = AssemblyCSV(filename, step_size=step_size, auto_link=config.auto_link,
                                        auto_input=config.auto_input, auto_output=config.auto_output, mt=config.mt,
-                                       profiling=config.profiling, fmu_directory=config.fmu_directory)
+                                       profiling=config.profiling, fmu_directory=fmu_directory)
             else:
                 logger.fatal(f"Not supported file format '{description}")
                 return

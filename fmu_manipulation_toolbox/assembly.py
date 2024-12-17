@@ -11,6 +11,7 @@ from .ssp import SSP
 
 logger = logging.getLogger("fmu_manipulation_toolbox")
 
+
 class Port:
     def __init__(self, fmu_name: str, port_name: str):
         self.fmu_name = fmu_name
@@ -98,7 +99,6 @@ class AssemblyNode:
         for port, value in self.start_values.items():
             container.add_start_value(port.fmu_name, port.port_name, value)
 
-
         container.add_implicit_rule(auto_input=auto_input,
                                     auto_output=auto_output,
                                     auto_link=self.auto_link)
@@ -107,7 +107,7 @@ class AssemblyNode:
 
         for node in self.children:
             logger.info(f"Deleting transient FMU Container '{node.name}'")
-            os.remove(node.name)
+            os.remove(fmu_directory / node.name)
 
 
 class AssemblyError(Exception):
@@ -119,7 +119,8 @@ class AssemblyError(Exception):
 
 
 class Assembly:
-    def __init__(self, description_pathname, root: AssemblyNode, auto_input = True, auto_output = True, fmu_directory: str= "."):
+    def __init__(self, description_pathname, root: AssemblyNode, auto_input = True, auto_output = True,
+                 fmu_directory: Path = "."):
         self.description_pathname = description_pathname
         self.root = root
         self.auto_input = auto_input
@@ -166,84 +167,33 @@ class Assembly:
         if node.children:
             json_node["container"] = [ self.json_encode_node(child) for child in node.children]
 
-        return json_node
-
-    def json_encode_node_old(self, node: AssemblyNode, prefix, root_stmt: List[str] = []) ->  str:
-        node_stmt = root_stmt
-
-        node_str = prefix + '{\n'
-        node_stmt.append(prefix + f'  "name": "{node.name}"')
-        node_stmt.append(prefix + f'  "mt": {"true" if node.mt else "false"}')
-        node_stmt.append(prefix + f'  "profiling": {"true" if node.profiling else "false"}')
-        node_stmt.append(prefix + f'  "auto_link": {"true" if node.auto_link else "false"}')
-        if node.step_size:
-            node_stmt.append(prefix + f'  "step_size": {node.step_size}')
-
-        if node.children:
-            string = prefix + '  "container": [\n'
-            containers = [ f'{prefix}{self.json_encode_node(child, prefix+"    ")}' for child in node.children]
-            string += ',\n'.join(containers)
-            string += f'\n{prefix}  ]'
-            node_stmt.append(string)
-
         if node.fmu_names_list:
-            string = prefix + '  "fmu": [\n'
-            fmu_names = [ f'{prefix}    "{fmu_name}"' for fmu_name in node.fmu_names_list]
-            string += ',\n'.join(fmu_names)
-            string += f'\n{prefix}  ]'
-            node_stmt.append(string)
+            json_node["fmu"] = [f"{fmu_name}" for fmu_name in node.fmu_names_list]
 
         if node.input_ports:
-            string = prefix + '  "input": [\n'
-            input_port = [ f'{prefix}    ["{source}", "{port.fmu_name}", "{port.port_name}"]'
-                           for port, source in node.input_ports.items()]
-            string += ',\n'.join(input_port)
-            string += f'\n{prefix}  ]'
-            node_stmt.append(string)
+            json_node["input"] = [[f"{source}", f"{port.fmu_name}", "{port.port_name}"]
+                                  for port, source in node.input_ports.items()]
 
         if node.output_ports:
-            string = prefix + '  "output": [\n'
-            output_port = [ f'{prefix}    ["{port.fmu_name}", "{port.port_name}", "{target}"]'
-                            for port, target in node.output_ports.items()]
-            string += ',\n'.join(output_port)
-            string += f'\n{prefix}  ]'
-            node_stmt.append(string)
+            json_node["output"] = [[f"{port.fmu_name}", "{port.port_name}", "{target}"]
+                                   for port, target in node.output_ports.items()]
 
         if node.links:
-            string = prefix + '  "link": [\n'
-            links = [ f'{prefix}    ["{link.from_port.fmu_name}", "{link.from_port.port_name}", "{link.to_port.fmu_name}", "{link.to_port.port_name}"]'
-                            for link in node.links]
-            string += ',\n'.join(links)
-            string += f'\n{prefix}  ]'
-            node_stmt.append(string)
+            json_node["link"] = [[f"{link.from_port.fmu_name}", f"{link.from_port.port_name}",
+                                  f"{link.to_port.fmu_name}", f"{link.to_port.port_name}"]
+                                 for link in node.links]
 
         if node.start_values:
-            string = prefix + '  "start": [\n'
-            starts = [ f'{prefix}    ["{port.fmu_name}", "{port.port_name}", "{start}"]'
-                           for port, start in node.start_values.items()]
-            string += ',\n'.join(starts)
-            string += f'\n{prefix}  ]'
-            node_stmt.append(string)
+            json_node["start"] = [[f"{port.fmu_name}", f"{port.port_name}", value]
+                                  for port, value in node.start_values.items()]
 
         if node.drop_ports:
-            string = prefix + '  "drop": [\n'
-            drops = [ f'{prefix}    ["{port.fmu_name}", "{port.port_name}"]'
-                           for port in node.drop_ports]
-            string += ',\n'.join(drops)
-            string += f'\n{prefix}  ]'
-            node_stmt.append(string)
+            json_node["drop"] = [[f"{port.fmu_name}", f"{port.port_name}"] for port in node.drop_ports]
 
-
-        node_str += ",\n".join(node_stmt)
-        node_str += f"\n{prefix}}}"
-
-        return node_str
+        return json_node
 
     def write_json(self, description_filename: Union[str, Path]):
         with open(self.fmu_directory / description_filename, "wt") as file:
-            root_stmt = [f'  "auto_input": {"true" if self.auto_input else "false"}',
-                         f'  "auto_output": {"true" if self.auto_input else "false"}']
-
             data = self.json_encode_node(self.root)
             json.dump(data, file, indent=2)
 
@@ -255,7 +205,7 @@ class Assembly:
 
 class AssemblyCSV(Assembly):
     def __init__(self, csv_filename: str, step_size = None, auto_link: bool = True,  auto_input: bool = True,
-                 auto_output: bool = True, mt: bool = False, profiling: bool = False, fmu_directory: str = "."):
+                 auto_output: bool = True, mt: bool = False, profiling: bool = False, fmu_directory: Path = "."):
 
         name = str(Path(csv_filename).with_suffix(".fmu"))
         root = AssemblyNode(name, step_size=step_size, auto_link=auto_link, mt=mt, profiling=profiling)
@@ -264,7 +214,7 @@ class AssemblyCSV(Assembly):
 
         logger.info(f"Reading '{csv_filename}'")
 
-        with open(Path(fmu_directory) / csv_filename) as file:
+        with open(fmu_directory / csv_filename) as file:
             reader = csv.reader(file, delimiter=';')
             self.check_headers(reader)
             for i, row in enumerate(reader):
@@ -334,9 +284,8 @@ class AssemblyCSV(Assembly):
 
 
 class AssemblyJson(Assembly):
-    def __init__(self, filename: str, fmu_directory: str = "."):
-
-        with open(filename) as file:
+    def __init__(self, filename: str, fmu_directory: Path = "."):
+        with open(fmu_directory / filename) as file:
             try:
                 data = json.load(file)
             except json.decoder.JSONDecodeError as e:
@@ -373,10 +322,15 @@ class AssemblyJson(Assembly):
                 node.add_output(line[0], line[1], line[2])
 
         if "start" in data:
-            for line in data["output"]:
+            for line in data["start"]:
                 node.add_start_value(line[0], line[1], line[2])
 
+        if "drop" in data:
+            for line in data["drop"]:
+                node.add_drop_port(line[0], line[1])
+
         return node
+
 
 class AssemblySSP(Assembly):
     def __init__(self, ssp_filename: str, auto_link: bool = True, auto_input: bool = True, auto_output: bool = True,
