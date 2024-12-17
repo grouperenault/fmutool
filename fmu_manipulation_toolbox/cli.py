@@ -203,7 +203,7 @@ def fmucontainer():
         try:
             assembly = Assembly(filename, step_size=step_size, auto_link=config.auto_link,
                                 auto_input=config.auto_input, auto_output=config.auto_output, mt=config.mt,
-                                profiling=config.profiling, fmu_directory=fmu_directory)
+                                profiling=config.profiling, fmu_directory=fmu_directory, debug=config.debug)
 
         except FileNotFoundError as e:
             logger.fatal(f"Cannot read file: {e}")
@@ -213,7 +213,7 @@ def fmucontainer():
             continue
 
         try:
-            assembly.make_fmu(debug=config.debug)
+            assembly.make_fmu()
         except FMUContainerError as e:
             logger.fatal(f"{filename}: {e}")
             continue

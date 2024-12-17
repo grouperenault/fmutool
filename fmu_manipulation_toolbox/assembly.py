@@ -31,7 +31,7 @@ class Connection:
 
 
 class AssemblyNode:
-    def __init__(self, name: str, step_size: float = None, mt = False, profiling = False,
+    def __init__(self, name: str, step_size: float = None, mt=False, profiling=False,
                  auto_link=True, auto_input=True, auto_output=True):
         self.name = name
         self.step_size = step_size
@@ -120,10 +120,11 @@ class AssemblyError(Exception):
 
 
 class Assembly:
-    def __init__(self, filename: str, step_size = None, auto_link: bool = True,  auto_input: bool = True,
-                 auto_output: bool = True, mt: bool = False, profiling: bool = False, fmu_directory: Path = "."):
+    def __init__(self, filename: str, step_size=None, auto_link=True,  auto_input=True, debug=False,
+                 auto_output=True, mt=False, profiling=False, fmu_directory: Path = "."):
         self.filename = Path(filename)
         self.default_auto_input = auto_input
+        self.debug=debug
         self.default_auto_output = auto_output
         self.default_step_size = step_size
         self.default_auto_link = auto_link
@@ -136,20 +137,22 @@ class Assembly:
             raise FMUContainerError(f"FMU directory is not valid: '{fmu_directory}'")
 
         self.description_pathname = fmu_directory / self.filename  # For inclusion in FMU
-        self.root = self.read()
+        self.root = None
+        self.read()
 
     def __del__(self):
-        for filename in self.transient_filenames:
-            filename.unlink()
+        if not self.debug:
+            for filename in self.transient_filenames:
+                filename.unlink()
 
-    def read(self) -> AssemblyNode:
+    def read(self):
         logger.info(f"Reading '{self.filename}'")
         if self.filename.suffix == ".json":
-            return self.read_json()
+            self.read_json()
         elif self.filename.suffix == ".ssp":
-            return self.read_ssp()
+            self.read_ssp()
         elif self.filename.suffix == ".csv":
-            return self.read_csv()
+            self.read_csv()
         else:
             raise FMUContainerError(f"Not supported file format '{self.filename}")
 
@@ -161,11 +164,11 @@ class Assembly:
         else:
             logger.critical(f"Unable to write to '{filename}': format unsupported.")
 
-    def read_csv(self) -> AssemblyNode:
+    def read_csv(self):
         name = str(self.filename.with_suffix(".fmu"))
-        root = AssemblyNode(name, step_size=self.default_step_size, auto_link=self.default_auto_link,
-                            mt=self.default_mt, profiling=self.default_profiling, auto_input=self.default_auto_input,
-                            auto_output=self.default_auto_output)
+        self.root = AssemblyNode(name, step_size=self.default_step_size, auto_link=self.default_auto_link,
+                                 mt=self.default_mt, profiling=self.default_profiling, auto_input=self.default_auto_input,
+                                 auto_output=self.default_auto_output)
 
         with open(self.description_pathname) as file:
             reader = csv.reader(file, delimiter=';')
@@ -183,16 +186,13 @@ class Assembly:
                 rule = rule.upper()
                 if rule in ("LINK", "INPUT", "OUTPUT", "DROP", "FMU", "START"):
                     try:
-                        self._read_csv_rule(root, rule,
-                                            from_fmu_filename, from_port_name,
-                                            to_fmu_filename, to_port_name)
+                        self._read_csv_rule(self.root, rule,
+                                            from_fmu_filename, from_port_name, to_fmu_filename, to_port_name)
                     except AssemblyError as e:
                         logger.error(f"Line #{i+2}: {e}. Line skipped.")
                         continue
                 else:
                     logger.error(f"Line #{i+2}: unexpected rule '{rule}'. Line skipped.")
-
-        return root
 
     def write_csv(self, filename: Union[str, Path]):
         if self.root.children:
@@ -257,16 +257,14 @@ class Assembly:
         if not headers == ["rule", "from_fmu", "from_port", "to_fmu", "to_port"]:
             raise AssemblyError("Header (1st line of the file) is not well formatted.")
 
-    def read_json(self) -> AssemblyNode:
+    def read_json(self):
         with open(self.description_pathname) as file:
             try:
                 data = json.load(file)
             except json.decoder.JSONDecodeError as e:
                 raise FMUContainerError(f"Cannot read json: {e}")
-        root = self.json_decode_node(data)
-        root.name = str(self.filename.with_suffix(".fmu"))
-
-        return root
+        self.root = self.json_decode_node(data)
+        self.root.name = str(self.filename.with_suffix(".fmu"))
 
     def write_json(self, filename: Union[str, Path]):
         with open(self.fmu_directory / filename, "wt") as file:
@@ -348,22 +346,48 @@ class Assembly:
 
         return node
     
-    def read_ssp(self) -> AssemblyNode:
+    def read_ssp(self):
         logger.warning("This feature is ALPHA stage.")
-        name = str(self.filename.with_suffix(".fmu"))
-        root = AssemblyNode(name, step_size=self.default_step_size, auto_link=self.default_auto_link,
-                            mt=self.default_mt, profiling=self.default_profiling, auto_input=self.default_auto_input,
-                            auto_output=self.default_auto_output)
+        node_stack: List[AssemblyNode] = []
+
         def start_element(tag_name, attrs):
             if tag_name == 'ssd:Connection':
-                root.add_link(attrs['startElement'] + '.fmu', attrs['startConnector'],
-                              attrs['endElement'] + '.fmu', attrs['endConnector'])
+                if 'startElement' in attrs:
+                    if 'endElement' in attrs:
+                        node_stack[-1].add_link(attrs['startElement'] + '.fmu', attrs['startConnector'],
+                                                attrs['endElement'] + '.fmu', attrs['endConnector'])
+                    else:
+                        node_stack[-1].add_output(attrs['startElement'] + '.fmu', attrs['startConnector'],
+                                                  attrs['endConnector'])
+                else:
+                    node_stack[-1].add_input(attrs['startConnector'],
+                                             attrs['endElement'] + '.fmu', attrs['endConnector'])
+
+            elif tag_name == 'ssd:System':
+                name = attrs['name']+".fmu"
+                logger.info(f"System: {name}")
+                node = AssemblyNode(name, step_size=self.default_step_size, auto_link=self.default_auto_link,
+                                    mt=self.default_mt, profiling=self.default_profiling,
+                                    auto_input=self.default_auto_input, auto_output=self.default_auto_output)
+                if node_stack:
+                    node_stack[-1].add_sub_node(node)
+                else:
+                    self.root = node
+
+                node_stack.append(node)
+
+            elif tag_name == 'ssd:Component':
+                logger.info(f"Component: {attrs}")
+
+        def end_element(tag_name):
+            if tag_name == 'ssd:System':
+                node_stack.pop()
 
         # TODO: handle nested SSD
         with zipfile.ZipFile(self.fmu_directory / self.filename) as zin:
             for file in zin.filelist:
                 target_filename = Path(file.filename).name
-                if file.filename.endswith(".fmu") or file.filename == "SystemStructure.ssd":
+                if file.filename.endswith(".fmu") or file.filename.endswith(".ssd"):
                     zin.getinfo(file.filename).filename = target_filename
                     zin.extract(file, path=self.fmu_directory)
                     logger.debug(f"Extraction {file.filename}")
@@ -375,8 +399,8 @@ class Assembly:
             with open(self.description_pathname, "rb") as file:
                 parser = xml.parsers.expat.ParserCreate()
                 parser.StartElementHandler = start_element
+                parser.EndElementHandler = end_element
                 parser.ParseFile(file)
-        return root
 
-    def make_fmu(self, debug=False):
-        self.root.make_fmu(self.fmu_directory, debug=debug, description_pathname=self.description_pathname)
+    def make_fmu(self):
+        self.root.make_fmu(self.fmu_directory, debug=self.debug, description_pathname=self.description_pathname)
