@@ -9,19 +9,19 @@ logger = logging.getLogger("fmutool")
 class SSP:
     def __init__(self, fmu_directory: Path, ssp_filename: Path):
         self.ssp_filename = ssp_filename
-        self.analyse_ssp(fmu_directory)
+        self.fmu_directory = fmu_directory
+        self.analyse_ssp()
 
-    def analyse_ssp(self, fmu_directory: Path):
-        with zipfile.ZipFile(self.ssp_filename) as zin:
+    def analyse_ssp(self):
+        with zipfile.ZipFile(self.fmu_directory / self.ssp_filename) as zin:
             for file in zin.filelist:
                 target_filename = Path(file.filename).name
                 if file.filename.endswith(".fmu"):  # Extract all FMUs into the fmu_directory
                     zin.getinfo(file.filename).filename = target_filename
-                    zin.extract(file, path=fmu_directory)
-                #elif file.filename == "SystemStructure.ssd":
-                elif file.filename.endswith(".ssd"):
+                    zin.extract(file, path=self.fmu_directory)
+                elif file.filename == "SystemStructure.ssd":
                     zin.getinfo(file.filename).filename = target_filename
-                    zin.extract(file, path=fmu_directory)
+                    zin.extract(file, path=self.fmu_directory)
                     with zin.open(file) as file_handle:
                         self.analyse_ssd(file_handle, target_filename)
                     

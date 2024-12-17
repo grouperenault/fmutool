@@ -42,7 +42,7 @@ class AssemblyNode:
         self.auto_output = auto_output
         self.children: List[AssemblyNode] = []
 
-        self.fmu_names_list: List[str] = []
+        self.fmu_names_list: Set[str] = set()
         self.input_ports: Dict[Port, str] = {}
         self.output_ports: Dict[Port, str] = {}
         self.start_values: Dict[Port, str] = {}
@@ -53,11 +53,11 @@ class AssemblyNode:
         if sub_node.name is None:
             sub_node.name = str(uuid.uuid4())+".fmu"
 
-        self.fmu_names_list.append(sub_node.name)
+        self.fmu_names_list.add(sub_node.name)
         self.children.append(sub_node)
 
     def add_fmu(self, fmu_name: str):
-        self.fmu_names_list.append(fmu_name)
+        self.fmu_names_list.add(fmu_name)
 
     def add_input(self, from_port_name: str, to_fmu_filename: str, to_port_name: str):
         self.input_ports[Port(to_fmu_filename, to_port_name)] = from_port_name
@@ -283,7 +283,7 @@ class Assembly:
             json_node["container"] = [self.json_encode_node(child) for child in node.children]
 
         if node.fmu_names_list:
-            json_node["fmu"] = [f"{fmu_name}" for fmu_name in node.fmu_names_list]
+            json_node["fmu"] = [f"{fmu_name}" for fmu_name in sorted(node.fmu_names_list)]
 
         if node.input_ports:
             json_node["input"] = [[f"{source}", f"{port.fmu_name}", f"{port.port_name}"]
