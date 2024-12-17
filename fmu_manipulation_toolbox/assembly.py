@@ -198,20 +198,20 @@ class Assembly:
             raise AssemblyError("This assembly is not flat. Cannot export to CSV file.")
 
         with open(self.fmu_directory / filename, "wt") as outfile:
-            print("rule;from_fmu;from_port;to_fmu;to_port", file=outfile)
+            outfile.write("rule;from_fmu;from_port;to_fmu;to_port\n")
             for fmu in self.root.fmu_names_list:
-                print(f"FMU;{fmu};;;", file=outfile)
+                outfile.write(f"FMU;{fmu};;;\n")
             for port, source in self.root.input_ports.items():
-                print(f"INPUT;;{source};{port.fmu_name};{port.port_name}", file=outfile)
+                outfile.write(f"INPUT;;{source};{port.fmu_name};{port.port_name}\n")
             for port, target in self.root.output_ports.items():
-                print(f"OUTPUT;{port.fmu_name};{port.port_name};;{target}", file=outfile)
+                outfile.write(f"OUTPUT;{port.fmu_name};{port.port_name};;{target}\n")
             for link in self.root.links:
-                print(f"LINK;{link.from_port.fmu_name};{link.from_port.port_name};"
-                      f"{link.to_port.fmu_name};{link.to_port.port_name}", file=outfile)
+                outfile.write(f"LINK;{link.from_port.fmu_name};{link.from_port.port_name};"
+                              f"{link.to_port.fmu_name};{link.to_port.port_name}\n")
             for port, value in self.root.start_values.items():
-                print(f"START;{port.fmu_name};{port.port_name};{value};", file=outfile)
+                outfile.write(f"START;{port.fmu_name};{port.port_name};{value};\n")
             for port in self.root.drop_ports:
-                print(f"DROP;{port.fmu_name};{port.port_name};;", file=outfile)
+                outfile.write(f"DROP;{port.fmu_name};{port.port_name};;\n")
 
     @staticmethod
     def _read_csv_rule(node: AssemblyNode, rule: str, from_fmu_filename: str, from_port_name: str,
@@ -264,9 +264,7 @@ class Assembly:
                 raise FMUContainerError(f"Cannot read json: {e}")
         root = self.json_decode_node(data)
         root.name = str(self.filename.with_suffix(".fmu"))
-        auto_input = data.get("auto_input", True)
-        auto_output = data.get("auto_output", True)
-
+        
         return root
 
     def write_json(self, filename: Union[str, Path]):
@@ -355,8 +353,8 @@ class Assembly:
         root = AssemblyNode(name, step_size=self.default_step_size, auto_link=self.default_auto_link,
                             mt=self.default_mt, profiling=self.default_profiling, auto_input=self.default_auto_input,
                             auto_output=self.default_auto_output)
-        def start_element(name, attrs):
-            if name == 'ssd:Connection':
+        def start_element(tag_name, attrs):
+            if tag_name == 'ssd:Connection':
                 root.add_link(attrs['startElement'] + '.fmu', attrs['startConnector'],
                               attrs['endElement'] + '.fmu', attrs['endConnector'])
 
