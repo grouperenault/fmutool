@@ -75,10 +75,9 @@ class AssemblyNode:
     def add_start_value(self, fmu_filename: str, port_name: str, value: str):
         self.start_values[Port(fmu_filename, port_name)] = value
 
-    def generate_fmu(self, fmu_directory: Path, auto_input=True, auto_output=True, debug=False,
-                     description_pathname=None):
+    def make_fmu(self, fmu_directory: Path, debug=False, description_pathname=None):
         for node in self.children:
-            node.generate_fmu(fmu_directory, debug=debug)
+            node.make_fmu(fmu_directory, debug=debug)
 
         container = FMUContainer(self.name, fmu_directory, description_pathname=description_pathname)
 
@@ -101,8 +100,8 @@ class AssemblyNode:
         for port, value in self.start_values.items():
             container.add_start_value(port.fmu_name, port.port_name, value)
 
-        container.add_implicit_rule(auto_input=auto_input,
-                                    auto_output=auto_output,
+        container.add_implicit_rule(auto_input=self.auto_input,
+                                    auto_output=self.auto_output,
                                     auto_link=self.auto_link)
 
         container.make_fmu(self.name, self.step_size, mt=self.mt, profiling=self.profiling, debug=debug)
@@ -287,11 +286,11 @@ class Assembly:
             json_node["fmu"] = [f"{fmu_name}" for fmu_name in node.fmu_names_list]
 
         if node.input_ports:
-            json_node["input"] = [[f"{source}", f"{port.fmu_name}", "{port.port_name}"]
+            json_node["input"] = [[f"{source}", f"{port.fmu_name}", f"{port.port_name}"]
                                   for port, source in node.input_ports.items()]
 
         if node.output_ports:
-            json_node["output"] = [[f"{port.fmu_name}", "{port.port_name}", "{target}"]
+            json_node["output"] = [[f"{port.fmu_name}", f"{port.port_name}", f"{target}"]
                                    for port, target in node.output_ports.items()]
 
         if node.links:
@@ -352,6 +351,4 @@ class Assembly:
         ssp = SSP(self.fmu_directory, self.filename)
 
     def make_fmu(self, debug=False):
-        self.write_json("toto.json")
-        self.root.generate_fmu(self.fmu_directory, auto_input=self.default_auto_input, auto_output=self.default_auto_output,
-                               debug=debug, description_pathname=self.fmu_directory / self.filename)
+        self.root.make_fmu(self.fmu_directory, debug=debug, description_pathname=self.fmu_directory / self.filename)
