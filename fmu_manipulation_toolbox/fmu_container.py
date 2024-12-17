@@ -30,10 +30,9 @@ class FMUPort:
     def set_port_type(self, type_name: str, attrs: Dict[str, str]):
         self.type_name = type_name
         self.child = attrs.copy()
-        try:
-            self.child.pop("unit")  # Unit are not supported
-        except KeyError:
-            pass
+        for unsupported in ("unit", "declaredType"):
+            if unsupported in self.child:
+                self.child.pop(unsupported)
 
     def xml(self, vr: int, name=None, causality=None, start=None):
 
@@ -104,10 +103,16 @@ class EmbeddedFMU(OperationAbstract):
             self.capabilities[capability] = attrs.get(capability, "false")
 
     def experiment_attrs(self, attrs):
-        self.step_size = float(attrs['stepSize'])
+        try:
+            self.step_size = float(attrs['stepSize'])
+        except KeyError:
+            logger.warning(f"FMU '{self.name}' does not specify preferred step size")
+            pass
 
     def scalar_type(self, type_name, attrs):
-        self.current_port.set_port_type(type_name, attrs)
+        if self.current_port:
+            self.current_port.set_port_type(type_name, attrs)
+        self.current_port = None
 
     def __repr__(self):
         return f"FMU '{self.name}' ({len(self.ports)} variables)"
@@ -341,6 +346,8 @@ class FMUContainer:
     def sanity_check(self, step_size: Union[float, None]):
         nb_error = 0
         for fmu in self.execution_order:
+            if not fmu.step_size:
+                continue
             ts_ratio = step_size / fmu.step_size
             if ts_ratio < 1.0:
                 logger.error(f"Container step_size={step_size}s is lower than FMU '{fmu.name}' "
