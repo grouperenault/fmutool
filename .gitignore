@@ -30,3 +30,5 @@ tests/containers/bouncing_ball/bouncing.json
 tests/containers/arch/hierarchical.fmu
 tests/containers/arch/flat.fmu
 tests/containers/arch/reversed.fmu
+tests/containers/ssp/bouncing.fmu
+tests/containers/ssp/bouncing
