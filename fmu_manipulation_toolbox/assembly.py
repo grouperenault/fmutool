@@ -135,6 +135,7 @@ class Assembly:
         if not fmu_directory.is_dir():
             raise FMUContainerError(f"FMU directory is not valid: '{fmu_directory}'")
 
+        self.description_pathname = fmu_directory / self.filename  # For inclusion in FMU
         self.root = self.read()
 
     def __del__(self):
@@ -166,7 +167,7 @@ class Assembly:
                             mt=self.default_mt, profiling=self.default_profiling, auto_input=self.default_auto_input,
                             auto_output=self.default_auto_output)
 
-        with open(self.fmu_directory / self.filename) as file:
+        with open(self.description_pathname) as file:
             reader = csv.reader(file, delimiter=';')
             self.check_csv_headers(reader)
             for i, row in enumerate(reader):
@@ -257,14 +258,14 @@ class Assembly:
             raise AssemblyError("Header (1st line of the file) is not well formatted.")
 
     def read_json(self) -> AssemblyNode:
-        with open(self.fmu_directory / self.filename) as file:
+        with open(self.description_pathname) as file:
             try:
                 data = json.load(file)
             except json.decoder.JSONDecodeError as e:
                 raise FMUContainerError(f"Cannot read json: {e}")
         root = self.json_decode_node(data)
         root.name = str(self.filename.with_suffix(".fmu"))
-        
+
         return root
 
     def write_json(self, filename: Union[str, Path]):
@@ -358,21 +359,24 @@ class Assembly:
                 root.add_link(attrs['startElement'] + '.fmu', attrs['startConnector'],
                               attrs['endElement'] + '.fmu', attrs['endConnector'])
 
+        # TODO: handle nested SSD
         with zipfile.ZipFile(self.fmu_directory / self.filename) as zin:
             for file in zin.filelist:
                 target_filename = Path(file.filename).name
-                if file.filename.endswith(".fmu"):  # Extract all FMUs into the fmu_directory
+                if file.filename.endswith(".fmu") or file.filename == "SystemStructure.ssd":
                     zin.getinfo(file.filename).filename = target_filename
                     zin.extract(file, path=self.fmu_directory)
                     logger.debug(f"Extraction {file.filename}")
                     self.transient_filenames.append(self.fmu_directory / file.filename)
-                elif file.filename == "SystemStructure.ssd":
-                    logger.debug(f"Analysing {file.filename}")
-                    with zin.open(file) as file_handle:
-                        parser = xml.parsers.expat.ParserCreate()
-                        parser.StartElementHandler = start_element
-                        parser.ParseFile(file_handle)
+
+        self.description_pathname = self.fmu_directory / "SystemStructure.ssd"
+        if self.description_pathname.is_file():
+            logger.debug(f"Analysing {self.description_pathname}")
+            with open(self.description_pathname, "rb") as file:
+                parser = xml.parsers.expat.ParserCreate()
+                parser.StartElementHandler = start_element
+                parser.ParseFile(file)
         return root
 
     def make_fmu(self, debug=False):
-        self.root.make_fmu(self.fmu_directory, debug=debug, description_pathname=self.fmu_directory / self.filename)
+        self.root.make_fmu(self.fmu_directory, debug=debug, description_pathname=self.description_pathname)
