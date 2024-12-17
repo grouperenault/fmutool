@@ -5,7 +5,7 @@ from colorama import Fore, Style, init
 
 from .fmu_operations import *
 from .fmu_container import FMUContainerError
-from .assembly import AssemblyCSV, AssemblyJson, AssemblySSP
+from .assembly import Assembly
 from .checker import checker_list
 from .version import __version__ as version
 from .help import Help
@@ -191,10 +191,6 @@ def fmucontainer():
         logger.setLevel(logging.DEBUG)
 
     fmu_directory = Path(config.fmu_directory)
-    if not fmu_directory.is_dir():
-        logger.fatal(f"FMU directory is not valid: '{fmu_directory}'")
-        return
-
     logger.info(f"FMU directory: '{fmu_directory}'")
 
     for description in config.container_descriptions_list:
@@ -204,19 +200,11 @@ def fmucontainer():
         except ValueError:
             step_size = None
             filename = description
-
         try:
-            if filename.endswith(".json"):
-                assembly = AssemblyJson(filename, fmu_directory=fmu_directory)
-            elif filename.endswith(".ssp"):
-                assembly = AssemblySSP()
-            elif filename.endswith(".csv"):
-                assembly = AssemblyCSV(filename, step_size=step_size, auto_link=config.auto_link,
-                                       auto_input=config.auto_input, auto_output=config.auto_output, mt=config.mt,
-                                       profiling=config.profiling, fmu_directory=fmu_directory)
-            else:
-                logger.fatal(f"Not supported file format '{description}")
-                return
+            assembly = Assembly(filename, step_size=step_size, auto_link=config.auto_link,
+                                auto_input=config.auto_input, auto_output=config.auto_output, mt=config.mt,
+                                profiling=config.profiling, fmu_directory=fmu_directory)
+
         except FileNotFoundError as e:
             logger.fatal(f"Cannot read file: {e}")
             continue

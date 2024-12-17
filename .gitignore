@@ -27,3 +27,5 @@ fmu_manipulation_toolbox/resources/darwin64/client_sm.dylib
 fmu_manipulation_toolbox/resources/darwin64/container.dylib
 fmu_manipulation_toolbox/resources/darwin64/server_sm
 tests/containers/bouncing_ball/bouncing.json
+tests/containers/arch/hierarchical.fmu
+tests/containers/arch/flat.fmu
