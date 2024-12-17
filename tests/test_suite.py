@@ -57,9 +57,9 @@ class FMUManipulationToolboxTestSuite(unittest.TestCase):
                                         OperationKeepOnlyRegexp("e"))
 
     def test_container(self):
-        assembly = Assembly("bouncing.csv", fmu_directory=Path("containers/bouncing_ball"), mt=True)
+        assembly = Assembly("bouncing.csv", fmu_directory=Path("containers/bouncing_ball"), mt=True, debug=True)
         assembly.write_json("bouncing.json")
-        assembly.make_fmu(debug=True)
+        assembly.make_fmu()
         self.assert_identical_files("containers/bouncing_ball/REF_container.txt",
                                     "containers/bouncing_ball/bouncing/resources/container.txt")
         self.assert_identical_files("containers/bouncing_ball/REF_bouncing.json",
