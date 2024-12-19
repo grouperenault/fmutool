@@ -230,7 +230,8 @@ class FMUContainer:
             container_port_name = to_port_name
         cport_to = ContainerPort(self.get_fmu(to_fmu_filename), to_port_name)
         if not cport_to.port.causality == "input":  # check causality
-            raise FMUContainerError(f"{cport_to} is {cport_to.port.causality} instead of INPUT.")
+            raise FMUContainerError(f"Tried to use '{cport_to}' as INPUT of the container but FMU causality is "
+                                    f"'{cport_to.port.causality}'.")
 
         logger.debug(f"INPUT: {to_fmu_filename}:{to_port_name}")
         self.mark_ruled(cport_to, 'INPUT')
@@ -242,7 +243,8 @@ class FMUContainer:
 
         cport_from = ContainerPort(self.get_fmu(from_fmu_filename), from_port_name)
         if cport_from.port.causality not in ("output", "local"):  # check causality
-            raise FMUContainerError(f"{cport_from} is {cport_from.port.causality} instead of OUTPUT or LOCAL")
+            raise FMUContainerError(f"Tried to use '{cport_from}' as INPUT of the container but FMU causality is "
+                                    f"'{cport_from.port.causality}'.")
 
         logger.debug(f"OUTPUT: {from_fmu_filename}:{from_port_name}")
         self.mark_ruled(cport_from, 'OUTPUT')
@@ -422,7 +424,7 @@ class FMUContainer:
 
   <CoSimulation
     modelIdentifier="{self.identifier}"
-    canHandleVariableCommunicationStepSize="yes"
+    canHandleVariableCommunicationStepSize="true"
     canBeInstantiatedOnlyOncePerProcess="{capabilities['canBeInstantiatedOnlyOncePerProcess']}"
     canNotUseMemoryManagementFunctions="true"
     canGetAndSetFMUstate="false"
