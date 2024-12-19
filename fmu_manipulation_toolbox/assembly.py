@@ -143,7 +143,10 @@ class Assembly:
     def __del__(self):
         if not self.debug:
             for filename in self.transient_filenames:
-                filename.unlink()
+                try:
+                    filename.unlink()
+                except FileNotFoundError:
+                    pass
 
     def read(self):
         logger.info(f"Reading '{self.filename}'")
