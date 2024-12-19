@@ -1014,8 +1014,8 @@ fmi2Status fmi2DoStep(fmi2Component c,
     container->time = current_time;
 
     if (fabs(currentCommunicationPoint + communicationStepSize - current_time) > container->tolerance) {
-        logger(container, fmi2Error, "CommunicationStepSize should be divisible by %e", container->time_step);
-        return fmi2Error;
+        logger(container, fmi2Warning, "CommunicationStepSize should be divisible by %e", container->time_step);
+        return fmi2Warning;
     }
 
     return status;
