@@ -264,7 +264,8 @@ class Assembly:
             except json.decoder.JSONDecodeError as e:
                 raise FMUContainerError(f"Cannot read json: {e}")
         self.root = self.json_decode_node(data)
-        self.root.name = str(self.filename.with_suffix(".fmu"))
+        if not self.root.name:
+            self.root.name = str(self.filename.with_suffix(".fmu"))
 
     def write_json(self, filename: Union[str, Path]):
         with open(self.fmu_directory / filename, "wt") as file:
@@ -321,22 +322,32 @@ class Assembly:
                             auto_input=auto_input, auto_output=auto_output)
 
         if "container" in data:
+            if not isinstance(data["container"], list):
+                raise FMUContainerError("JSON: 'container' keyword should define a list.")
             for sub_data in data["container"]:
                 node.add_sub_node(self.json_decode_node(sub_data))
 
         if "fmu" in data:
+            if not isinstance(data["fmu"], list):
+                raise FMUContainerError("JSON: 'fmu' keyword should define a list.")
             for fmu in data["fmu"]:
                 node.add_fmu(fmu)
 
         if "input" in data:
+            if not isinstance(data["input"], list):
+                raise FMUContainerError("JSON: 'input' keyword should define a list.")
             for line in data["input"]:
                 node.add_input(line[1], line[2], line[0])
 
         if "output" in data:
+            if not isinstance(data["output"], list):
+                raise FMUContainerError("JSON: 'output' keyword should define a list.")
             for line in data["output"]:
                 node.add_output(line[0], line[1], line[2])
 
         if "start" in data:
+            if not isinstance(data["start"], list):
+                raise FMUContainerError("JSON: 'start' keyword should define a list.")
             for line in data["start"]:
                 node.add_start_value(line[0], line[1], line[2])
 
