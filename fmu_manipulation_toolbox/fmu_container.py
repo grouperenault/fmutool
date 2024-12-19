@@ -69,7 +69,6 @@ class FMUPort:
 
 class EmbeddedFMU(OperationAbstract):
     capability_list = ("needsExecutionTool",
-                       "canHandleVariableCommunicationStepSize",
                        "canBeInstantiatedOnlyOncePerProcess")
 
     def __init__(self, filename):
@@ -418,12 +417,12 @@ class FMUContainer:
   description="FMUContainer with {embedded_fmu}"
   author="{author}"
   license="Proprietary"
-  copyright="© Renault S.A.S"
+  copyright="See Embedded FMU's copyrights."
   variableNamingConvention="structured">
 
   <CoSimulation
     modelIdentifier="{self.identifier}"
-    canHandleVariableCommunicationStepSize="{capabilities['canHandleVariableCommunicationStepSize']}"
+    canHandleVariableCommunicationStepSize="yes"
     canBeInstantiatedOnlyOncePerProcess="{capabilities['canBeInstantiatedOnlyOncePerProcess']}"
     canNotUseMemoryManagementFunctions="true"
     canGetAndSetFMUstate="false"
