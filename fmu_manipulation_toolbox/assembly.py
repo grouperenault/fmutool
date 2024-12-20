@@ -132,6 +132,7 @@ class Assembly:
         self.default_profiling = profiling
         self.fmu_directory = fmu_directory
         self.transient_filenames: List[Path] = []
+        self.transient_dirnames: Set[Path] = set()
 
         if not fmu_directory.is_dir():
             raise FMUContainerError(f"FMU directory is not valid: '{fmu_directory}'")
@@ -140,6 +141,10 @@ class Assembly:
         self.root = None
         self.read()
 
+    def add_transient_file(self, filename: str):
+        self.transient_filenames.append(self.fmu_directory / filename)
+        self.transient_dirnames.add(Path(filename).parent)
+
     def __del__(self):
         if not self.debug:
             for filename in self.transient_filenames:
@@ -147,6 +152,13 @@ class Assembly:
                     filename.unlink()
                 except FileNotFoundError:
                     pass
+            for dirname in self.transient_dirnames:
+                while not str(dirname) == ".":
+                    try:
+                        (self.fmu_directory / dirname).rmdir()
+                    except FileNotFoundError:
+                        pass
+                    dirname = dirname.parent
 
     def read(self):
         logger.info(f"Reading '{self.filename}'")
@@ -365,19 +377,17 @@ class Assembly:
 
         with zipfile.ZipFile(self.fmu_directory / self.filename) as zin:
             for file in zin.filelist:
-                target_filename = Path(file.filename).name
                 if file.filename.endswith(".fmu") or file.filename.endswith(".ssd"):
-                    zin.getinfo(file.filename).filename = target_filename
                     zin.extract(file, path=self.fmu_directory)
-                    logger.debug(f"Extraction {file.filename}")
-                    self.transient_filenames.append(self.fmu_directory / file.filename)
+                    logger.debug(f"Extracted: {file.filename}")
+                    self.add_transient_file(file.filename)
 
         self.description_pathname = self.fmu_directory / "SystemStructure.ssd"
         if self.description_pathname.is_file():
             sdd = SSDParser(step_size=self.default_step_size, auto_link=self.default_auto_link,
                             mt=self.default_mt, profiling=self.default_profiling,
                             auto_input=self.default_auto_input, auto_output=self.default_auto_output)
-            self.root = sdd.parse(self.fmu_directory / "SystemStructure.ssd")
+            self.root = sdd.parse(self.description_pathname)
 
     def make_fmu(self):
         self.root.make_fmu(self.fmu_directory, debug=self.debug, description_pathname=self.description_pathname)
@@ -430,7 +440,7 @@ class SSDParser:
             self.node_stack.append(node)
 
         elif tag_name == 'ssd:Component':
-            filename = Path(attrs['source']).name
+            filename = attrs['source']
             name = attrs['name']
             self.fmu_filenames[name] = filename
             self.node_stack[-1].add_fmu(filename)
