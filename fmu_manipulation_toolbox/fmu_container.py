@@ -37,7 +37,7 @@ class FMUPort:
     def xml(self, vr: int, name=None, causality=None, start=None):
 
         if self.child is None:
-            raise FMUException(f"FMUPort has no child. Bug?")
+            raise FMUContainerError(f"FMUPort has no child. Bug?")
 
         child_str = f"<{self.type_name}"
         if self.child:
@@ -85,6 +85,8 @@ class EmbeddedFMU(OperationAbstract):
         self.current_port = None  # used during apply_operation()
 
         self.fmu.apply_operation(self)  # Should be the last command in constructor!
+        if self.model_identifier is None:
+            raise FMUContainerError(f"FMU '{self.name}' does not implement Co-Simulation mode.")
 
     def fmi_attrs(self, attrs):
         self.guid = attrs['guid']
@@ -176,7 +178,7 @@ class ValueReferenceTable:
     def get_vr(self, cport: ContainerPort) -> int:
         return self.add_vr(cport.port.type_name)
 
-    def add_vr(self, type_name:str) -> int:
+    def add_vr(self, type_name: str) -> int:
         vr = self.vr_table[type_name]
         self.vr_table[type_name] += 1
         return vr
@@ -445,7 +447,8 @@ class FMUContainer:
             for fmu in self.execution_order:
                 vr = vr_table.add_vr("Real")
                 name = f"container.{fmu.model_identifier}.rt_ratio"
-                print(f'<ScalarVariable valueReference="{vr}" name="{name}" causality="local"><Real /></ScalarVariable>', file=xml_file)
+                print(f'<ScalarVariable valueReference="{vr}" name="{name}" causality="local">'
+                      f'<Real /></ScalarVariable>', file=xml_file)
 
         # Local variable should be first to ensure to attribute them the lowest VR.
         for local in self.locals.values():
@@ -562,7 +565,7 @@ class FMUContainer:
             if profiling and type_name == "Real":
                 nb += len(self.execution_order)
                 print(nb, file=txt_file)
-                for profiling_port,_ in enumerate(self.execution_order):
+                for profiling_port, _ in enumerate(self.execution_order):
                     print(f"{profiling_port} -2 {profiling_port}", file=txt_file)
             else:
                 print(nb, file=txt_file)
